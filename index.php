@@ -221,7 +221,7 @@ function render(meta){
       <td class="px-3 py-3 hide-mobile font-mono text-[12px]">${r.context||'1M'}</td>
       <td class="px-3 py-3 font-mono text-[13px] font-semibold">${price(r.output_price)}</td>
       <td class="px-3 py-3 font-mono text-[13px]"><span class="${cacheClass}">${price(r.cache_read_price)}</span></td>
-      <td class="px-3 py-3 bg-amber-50/50 border-l border-amber-200"><div class="font-mono font-bold text-[14px] text-amber-700">${fmt(r.req_month||0)}/月</div><div class="text-[11px] font-mono text-muted">$${r.budget|| (r.source==='opencode'?60:20)}预算 · ${fmt(r.req_5h||0)}/5h</div></td>
+      <td class="px-3 py-3 bg-amber-50/50 border-l border-amber-200">${r.is_free ? `<div class="font-mono font-bold text-[14px] text-emerald-600">FREE∞</div><div class="text-[11px] font-mono text-muted">不限量 · 分数${r.intelligence??'待评'}</div>` : `<div class="font-mono font-bold text-[14px] text-amber-700" title="精确 ${(r.req_month||0).toLocaleString()}/月">${((r.req_month||0)>=10000 ? ((r.req_month/1000).toFixed(1)+'k') : (r.req_month||0).toLocaleString())}/月</div><div class="text-[11px] font-mono text-muted">$${r.budget|| (r.source==='opencode'?60:20)}预算 · ${fmt(r.req_5h||0)}/5h</div>`}</td>
       <td class="px-3 py-3"><span class="inline-flex items-center gap-2"><span class="w-2 h-2 rounded-full ${valueColor}"></span><span class="font-semibold">${valueLabel}</span></span><div class="text-[11px] text-muted font-mono">${value.toFixed(0)}</div></td>
     </tr>`;
   }).join('');
