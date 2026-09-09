@@ -238,15 +238,17 @@ function do_refresh(string $actor='cron', string $type='auto'): array {
     foreach($op as &$o){
         $norm = normalize_id($o['model_id']);
         if (isset($map[$norm])) $o['intelligence']=$map[$norm];
-        // try fuzzy: remove variant suffixes like -free
+        // try fuzzy: remove variant suffixes like -free, or add -free (GOAT free variant holds the score)
         if ($o['intelligence']===null) {
             $base = preg_replace('/-free$/','',$norm);
             if (isset($map[$base])) $o['intelligence']=$map[$base];
+            elseif (isset($map[$norm.'-free'])) $o['intelligence']=$map[$norm.'-free'];
         }
         if (isset($ccMap[$norm])) { $o['tps']=$ccMap[$norm]['tps']; $o['context']=$ccMap[$norm]['context']; }
         else {
             $base = preg_replace('/-free$/','',$norm);
             if (isset($ccMap[$base])) { $o['tps']=$ccMap[$base]['tps']; $o['context']=$ccMap[$base]['context']; }
+            elseif (isset($ccMap[$norm.'-free'])) { $o['tps']=$ccMap[$norm.'-free']['tps']; $o['context']=$ccMap[$norm.'-free']['context']; }
         }
     }
     unset($o);
