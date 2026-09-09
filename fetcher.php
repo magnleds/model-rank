@@ -89,13 +89,30 @@ function parse_opencode(): array {
             foreach ($data['data'] as $m) if (!empty($m['id'])) $ids[] = normalize_id($m['id']);
         }
     }
-    // Canonical: use pricing table (go.mdx) as source of truth, not /v1/models (stale extras)
+    // Canonical: pricing table (go.mdx) + any new ids from /v1/models (fallback,待定价)
+    $liveIds = $ids;
     $ids = array_keys($pricing);
+    // append unknown live ids as fallback entries (new models,待定价)
+    foreach($liveIds as $lid){
+        if (!isset($pricing[$lid]) && !in_array($lid, $ids)) $ids[] = $lid;
+    }
     $out=[];
     foreach(array_unique($ids) as $id){
         $norm = normalize_id($id);
         $pr = $pricing[$norm] ?? null;
-        if (!$pr) continue;
+        if (!$pr) {
+            // new model not in pricing table yet: show as 待定价, is_new will mark
+            $out[]=[
+                'source'=>'opencode',
+                'model_id'=>$norm,
+                'display_name'=>ucwords(str_replace(['-','.'],' ', $norm)),
+                'context'=>'1M',
+                'req_5h'=>0,'req_week'=>0,'req_month'=>0,'budget'=>60,
+                'input_price'=>null,'output_price'=>null,'cache_read_price'=>null,'cache_write_price'=>null,
+                'intelligence'=>null,'tps'=>null,
+            ];
+            continue;
+        }
         $cost = ($pr['in']*800 + $pr['out']*200 + $pr['cache']*50000)/1000000;
         if ($cost<=0) $cost=0.0001;
         $req_month = (int)($pr['budget'] / $cost);

@@ -113,7 +113,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
         <select id="sort" class="px-3 py-2 rounded-full border border-line bg-white text-[13px] font-medium">
           <option value="value">性价比 (分数×额度÷预算)</option>
           <option value="intelligence">分数优先</option>
-          <option value="req_month" selected>额度优先 (月请求数)</option>
+          <option value="req_month">额度优先 (月请求数)</option>
           <option value="cache">缓存便宜优先</option>
           <option value="tps">速度优先</option>
         </select>
@@ -163,7 +163,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
 const $ = s=>document.querySelector(s);
 const tbody = $('#tbody');
 let data = [];
-let filters = {q:'', source:'opencode', only_new:false, sort:'req_month', dir:'desc', quick:''};
+let filters = {q:'', source:'opencode', only_new:false, sort:'value', dir:'desc', quick:''};
 
 function fmt(n){ if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(n>=10000?0:1)+'k'; return String(n); }
 function price(v){ if(v===null||v===undefined) return '<span class="text-muted">—</span>'; if(v===0) return '<span class="tag bg-emerald-500 text-white">FREE</span>'; let s=Number(v); if(s<0.01) return '$'+s.toFixed(3); if(s<0.1) return '$'+s.toFixed(3); return '$'+s.toFixed(2); }

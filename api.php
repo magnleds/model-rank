@@ -24,17 +24,18 @@ if ($action === 'list_models') {
     if ($only_new) { $where[]='is_new=1'; }
     $whereSql = $where ? ('WHERE '.implode(' AND ',$where)) : '';
     $orderSql = ($orderCol === 'cache_read_price') ? "COALESCE(cache_read_price,999) $dir" : "$orderCol $dir";
-    $sql = "SELECT *, 
-        CASE WHEN intelligence IS NULL THEN 0 ELSE intelligence END as intel_coalesce,
-        CASE 
-          WHEN input_price IS NULL THEN 999999
+    $sql = "SELECT *,
+        CASE
           WHEN (input_price=0 AND output_price=0) THEN 0.00001
-          ELSE (input_price*800 + output_price*200 + cache_read_price*50000)/1000000
+          WHEN budget>0 AND req_month>0 THEN budget*1.0/req_month
+          WHEN input_price IS NULL THEN 999999
+          ELSE (input_price*800 + output_price*200 + COALESCE(cache_read_price,0)*50000)/1000000
         END as cost_per_req,
         CASE
-          WHEN input_price IS NULL THEN COALESCE(intelligence,0) * req_month / 60000.0
           WHEN (input_price=0 AND output_price=0) THEN COALESCE(intelligence,25)*1000
-          ELSE COALESCE(intelligence,0) / ((input_price*800 + output_price*200 + cache_read_price*50000)/1000000 + 0.0001)
+          WHEN budget>0 AND req_month>0 THEN MAX(COALESCE(intelligence,0)-30,0) * req_month *1.0 / budget
+          WHEN input_price IS NULL THEN 0
+          ELSE MAX(COALESCE(intelligence,0)-30,0) / ((input_price*800 + output_price*200 + COALESCE(cache_read_price,0)*50000)/1000000 + 0.0001)
         END as value_score
         FROM models $whereSql ORDER BY $orderSql, intelligence DESC";
     $stmt = db()->prepare($sql);
