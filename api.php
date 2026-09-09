@@ -33,9 +33,11 @@ if ($action === 'list_models') {
         elseif ($col === 'cost_per_req') $orderParts[] = "cost_per_req $d";
         else $orderParts[] = "$col $d";
     }
-    // always tie-break by intelligence desc unless already included
+    // tie-break: intelligence (unless primary), then quota desc (same model cross-platform: bigger quota first)
     $hasIntel = in_array('intelligence', array_slice($sortCols,0,2));
     if (!$hasIntel) $orderParts[] = "intelligence DESC";
+    $hasReq = in_array('req_month', array_slice($sortCols,0,2));
+    if (!$hasReq) $orderParts[] = "req_month DESC";
     $orderSql = implode(', ', $orderParts);
     $orderCol = $sortMap[preg_replace('/[^a-z_]/','', $sortCols[0])] ?? 'value_score';
     // multi filters
@@ -54,10 +56,6 @@ if ($action === 'list_models') {
     if ($max_input!==null) { $where[]='(input_price IS NOT NULL AND input_price <= CAST(? AS REAL))'; $args[]=$max_input; }
     if ($max_budget!==null) { $where[]='(budget IS NOT NULL AND budget <= CAST(? AS REAL))'; $args[]=$max_budget; }
     $whereSql = $where ? ('WHERE '.implode(' AND ',$where)) : '';
-    if ($orderCol === 'cache_read_price') $orderSql = "COALESCE(cache_read_price,999) $dir";
-    elseif ($orderCol === 'input_price' || $orderCol === 'output_price') $orderSql = "COALESCE($orderCol,999) $dir";
-    elseif ($orderCol === 'cost_per_req') $orderSql = "cost_per_req $dir";
-    else $orderSql = "$orderCol $dir";
     $sql = "SELECT *,
         CASE
           WHEN (input_price=0 AND output_price=0) THEN 0.00001
