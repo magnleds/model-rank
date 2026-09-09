@@ -80,7 +80,7 @@ if ($action === 'list_models') {
         $r['is_new_calc'] = ($now - (int)$r['first_seen_at']) < 7*86400 ? 1 : 0;
         $r['days_old'] = (int)floor(($now - (int)$r['first_seen_at'])/86400);
     }
-    $meta_last = get_meta('last_auto_refresh','0');
+    $meta_last = max((int)get_meta('last_auto_refresh','0'), (int)get_meta('last_manual_refresh','0'));
     $total = (int)db()->query("SELECT COUNT(*) FROM models")->fetchColumn();
     $op = (int)db()->query("SELECT COUNT(*) FROM models WHERE source='opencode'")->fetchColumn();
     $cc = (int)db()->query("SELECT COUNT(*) FROM models WHERE source='commandcode'")->fetchColumn();
