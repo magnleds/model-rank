@@ -71,7 +71,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 class="text-[22px] md:text-[26px] font-bold tracking-tight leading-tight">用<span class="bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent">性价比分</span>挑模型，<br class="hidden md:block">不只看价格，也不只看榜单。</h1>
-          <p class="text-[13px] text-muted mt-2 leading-relaxed">默认排序 = <b class="text-ink">Intelligence ÷ 单次成本</b>（800 in + 200 out + 50k cache）。额度越高越便宜，分数越高越强，<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span>NEW</span> 为7天内新上架。</p>
+          <p class="text-[13px] text-muted mt-2 leading-relaxed">默认排序 = <b class="text-ink">Intelligence × 月额度 ÷ 预算</b>（单次成本=800 in+200 out+50k cache，缓存占比最高）。<b>月额度</b>=预算÷单次成本，额度越高越便宜，分数越高越强，<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span>NEW</span> 为7天内新上架。</p>
         </div>
         <div class="flex gap-2 text-[11px]">
           <span class="tag bg-slate-900 text-white">7x GOAT $10→$70</span>
@@ -111,9 +111,10 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
           <input id="q" placeholder="搜索模型，如 Muse Spark / DeepSeek" class="w-full pl-8 pr-3 py-2 rounded-full border border-line bg-[#F8FAFC] text-[13px] outline-none focus:border-amber-400 focus:bg-white">
         </div>
         <select id="sort" class="px-3 py-2 rounded-full border border-line bg-white text-[13px] font-medium">
-          <option value="value">性价比优先 ★</option>
+          <option value="value">性价比优先 ★ (分数×额度÷预算)</option>
           <option value="intelligence">分数优先</option>
-          <option value="req_month">额度优先</option>
+          <option value="req_month">额度优先 (月请求数)</option>
+          <option value="cache">缓存便宜优先</option>
           <option value="tps">速度优先</option>
         </select>
       </div>
@@ -139,8 +140,8 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
             <th class="sortable px-3 py-3 text-left" data-sort="intelligence">Intelligence <span class="text-[10px]">↕</span></th>
             <th class="px-3 py-3 text-left hide-mobile">上下文</th>
             <th class="sortable px-3 py-3 text-left hide-mobile" data-sort="tps">速度 <span class="text-[10px]">↕</span></th>
-            <th class="px-3 py-3 text-left min-w-[160px]">单价 / 1M</th>
-            <th class="sortable px-3 py-3 text-left" data-sort="req_month">月额度 <span class="text-[10px]">↕</span></th>
+            <th class="px-3 py-3 text-left min-w-[180px]">单价 / 1M <span class="text-[10px] text-muted">(含缓存)</span></th>
+            <th class="sortable px-3 py-3 text-left" data-sort="req_month">月额度 <span class="text-[10px]">↕</span> <span class="text-[10px] text-muted">预算÷成本</span></th>
             <th class="sortable px-3 py-3 text-left" data-sort="value">性价比 <span class="text-[10px]">↕</span></th>
           </tr>
         </thead>
@@ -210,10 +211,11 @@ function render(meta){
     const intel = r.intelligence;
     const intelStr = intel===null ? '<span class="text-muted text-[12px]">待评分</span>' : `<span class="font-mono font-semibold">${Number(intel).toFixed(1)}</span>`;
     const pct = intel===null?0:Math.min(100, (intel/56)*100);
-    const platform = r.source==='opencode' ? '<span class="tag bg-slate-900 text-white">Go</span>' : '<span class="tag bg-amber-500 text-white">GOAT</span>';
+    const platform = r.source==='opencode' ? `<span class="tag bg-slate-900 text-white">Go $${r.budget||60}</span>` : `<span class="tag bg-amber-500 text-white">GOAT $${r.budget||20}</span>`;
+    const cacheClass = r.cache_read_price===null ? 'text-muted' : (r.cache_read_price<=0.02 ? 'text-emerald-600 font-semibold' : (r.cache_read_price>=0.1 ? 'text-red-600' : 'text-amber-600'));
     const pricing = r.source==='opencode'
-      ? `<span class="font-mono text-[12px]">${fmt(r.req_month)}/月 · ${fmt(r.req_5h)}/5h</span>`
-      : `<span class="font-mono text-[12px]">${price(r.input_price)} → ${price(r.output_price)} <span class="text-muted">cache ${price(r.cache_read_price)}</span></span>`;
+      ? `<span class="font-mono text-[12px]">${fmt(r.req_month)}/月 <span class="text-[11px] text-muted">预算$${r.budget||60}</span></span><div class="text-[11px] text-muted font-mono">${fmt(r.req_5h)}/5h</div>`
+      : `<span class="font-mono text-[12px]">${price(r.input_price)} → ${price(r.output_price)} <span class="${cacheClass}">cache ${price(r.cache_read_price)}</span></span><div class="text-[11px] text-muted">预算 $${r.budget||20} → ${fmt(r.req_month)}/月</div>`;
     const value = Number(r.value_score||0);
     const valueLabel = value>900 ? '极高' : value>400 ? '高' : value>150 ? '中' : '低';
     const valueColor = value>900?'bg-emerald-500':value>400?'bg-amber-500':value>150?'bg-slate-700':'bg-slate-300';

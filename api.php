@@ -16,13 +16,14 @@ if ($action === 'list_models') {
     $only_new = (string)($_GET['only_new'] ?? '') === '1';
     $sort = preg_replace('/[^a-z_]/','', (string)($_GET['sort'] ?? 'value'));
     $dir = strtolower((string)($_GET['dir'] ?? 'desc')) === 'asc' ? 'ASC' : 'DESC';
-    $sortMap = ['value'=>'value_score','intelligence'=>'intelligence','req_month'=>'req_month','tps'=>'tps','price'=>'input_price','updated'=>'updated_at',];
+    $sortMap = ['value'=>'value_score','intelligence'=>'intelligence','req_month'=>'req_month','tps'=>'tps','price'=>'input_price','cache'=>'cache_read_price','updated'=>'updated_at',];
     $orderCol = $sortMap[$sort] ?? 'value_score';
     $where=[]; $args=[];
     if ($q !== '') { $where[]='(display_name LIKE ? OR model_id LIKE ?)'; $args[]="%$q%"; $args[]="%$q%"; }
     if ($source !== '' && in_array($source, ['opencode','commandcode'])) { $where[]='source=?'; $args[]=$source; }
     if ($only_new) { $where[]='is_new=1'; }
     $whereSql = $where ? ('WHERE '.implode(' AND ',$where)) : '';
+    $orderSql = ($orderCol === 'cache_read_price') ? "COALESCE(cache_read_price,999) $dir" : "$orderCol $dir";
     $sql = "SELECT *, 
         CASE WHEN intelligence IS NULL THEN 0 ELSE intelligence END as intel_coalesce,
         CASE 
@@ -35,7 +36,7 @@ if ($action === 'list_models') {
           WHEN (input_price=0 AND output_price=0) THEN COALESCE(intelligence,25)*1000
           ELSE COALESCE(intelligence,0) / ((input_price*800 + output_price*200 + cache_read_price*50000)/1000000 + 0.0001)
         END as value_score
-        FROM models $whereSql ORDER BY $orderCol $dir, intelligence DESC";
+        FROM models $whereSql ORDER BY $orderSql, intelligence DESC";
     $stmt = db()->prepare($sql);
     $stmt->execute($args);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
