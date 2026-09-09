@@ -24,8 +24,8 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ModelRank · GOAT vs Go 性价比榜</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
-<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{ink:'#0F172A',muted:'#64748B',line:'#E2E8F0',accent:'#F59E0B',accent2:'#EA580C'}}}}</script>
+<!-- fonts removed for speed, use system fonts -->
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['system-ui','-apple-system','sans-serif'],mono:['ui-monospace','SFMono-Regular','monospace']},colors:{ink:'#0F172A',muted:'#64748B',line:'#E2E8F0',accent:'#F59E0B',accent2:'#EA580C'}}}}</script>
 <style>
 *{-webkit-font-smoothing:antialiased}
 .glass{backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
@@ -241,7 +241,6 @@ $('#btnNew').addEventListener('click',()=>{
   load();
 });
 $('#q').addEventListener('input', e=>{ filters.q=e.target.value; clearTimeout(window._t); window._t=setTimeout(load,300); });
-$('#sort').addEventListener('change', e=>{ filters.sort=e.target.value; load(); });
 
 document.querySelectorAll('.sortable').forEach(th=>{
   th.addEventListener('click',()=>{
