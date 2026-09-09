@@ -100,9 +100,9 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
   <div class="card p-3 md:p-4 flex flex-col gap-3">
     <div class="flex flex-col md:flex-row gap-3 md:items-center justify-between">
       <div class="flex items-center gap-2 flex-wrap">
-        <button data-source="" class="pill active">全部</button>
+        <button data-source="" class="pill">全部</button>
         <button data-source="commandcode" class="pill">⚡ Command Code GOAT <span id="c-cc" class="ml-1 text-muted">—</span></button>
-        <button data-source="opencode" class="pill">◆ OpenCode Go <span id="c-op" class="ml-1 text-muted">—</span></button>
+        <button data-source="opencode" class="pill active">◆ OpenCode Go <span id="c-op" class="ml-1 text-muted">—</span></button>
         <button id="btnNew" class="pill">✦ 只看 NEW <span id="c-new" class="ml-1">—</span></button>
       </div>
       <div class="flex items-center gap-2">
@@ -163,7 +163,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
 const $ = s=>document.querySelector(s);
 const tbody = $('#tbody');
 let data = [];
-let filters = {q:'', source:'', only_new:false, sort:'req_month', dir:'desc', quick:''};
+let filters = {q:'', source:'opencode', only_new:false, sort:'req_month', dir:'desc', quick:''};
 
 function fmt(n){ if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(n>=10000?0:1)+'k'; return String(n); }
 function price(v){ if(v===null||v===undefined) return '<span class="text-muted">—</span>'; if(v===0) return '<span class="tag bg-emerald-500 text-white">FREE</span>'; let s=Number(v); if(s<0.01) return '$'+s.toFixed(3); if(s<0.1) return '$'+s.toFixed(3); return '$'+s.toFixed(2); }
