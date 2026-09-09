@@ -111,9 +111,9 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
           <input id="q" placeholder="搜索模型，如 Muse Spark / DeepSeek" class="w-full pl-8 pr-3 py-2 rounded-full border border-line bg-[#F8FAFC] text-[13px] outline-none focus:border-amber-400 focus:bg-white">
         </div>
         <select id="sort" class="px-3 py-2 rounded-full border border-line bg-white text-[13px] font-medium">
-          <option value="value">性价比优先 ★ (分数×额度÷预算)</option>
+          <option value="value">性价比 (分数×额度÷预算)</option>
           <option value="intelligence">分数优先</option>
-          <option value="req_month">额度优先 (月请求数)</option>
+          <option value="req_month" selected>额度优先 (月请求数)</option>
           <option value="cache">缓存便宜优先</option>
           <option value="tps">速度优先</option>
         </select>
@@ -141,7 +141,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
             <th class="px-3 py-3 text-left hide-mobile">上下文</th>
             <th class="sortable px-3 py-3 text-left hide-mobile" data-sort="tps">速度 <span class="text-[10px]">↕</span></th>
             <th class="px-3 py-3 text-left min-w-[180px]">单价 / 1M <span class="text-[10px] text-muted">(含缓存)</span></th>
-            <th class="sortable px-3 py-3 text-left" data-sort="req_month">月额度 <span class="text-[10px]">↕</span> <span class="text-[10px] text-muted">预算÷成本</span></th>
+            <th class="sortable px-3 py-3 text-left bg-amber-50" data-sort="req_month">月额度 <span class="text-[10px]">↕</span> <span class="text-[10px] text-amber-700 font-bold">★主要参考</span></th>
             <th class="sortable px-3 py-3 text-left" data-sort="value">性价比 <span class="text-[10px]">↕</span></th>
           </tr>
         </thead>
@@ -163,10 +163,10 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
 const $ = s=>document.querySelector(s);
 const tbody = $('#tbody');
 let data = [];
-let filters = {q:'', source:'', only_new:false, sort:'value', dir:'desc', quick:''};
+let filters = {q:'', source:'', only_new:false, sort:'req_month', dir:'desc', quick:''};
 
 function fmt(n){ if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(n>=10000?0:1)+'k'; return String(n); }
-function price(v){ if(v===null||v===undefined) return '<span class="text-muted">—</span>'; if(v===0) return '<span class="tag bg-emerald-500 text-white">FREE</span>'; return '$'+Number(v).toFixed(2); }
+function price(v){ if(v===null||v===undefined) return '<span class="text-muted">—</span>'; if(v===0) return '<span class="tag bg-emerald-500 text-white">FREE</span>'; let s=Number(v); if(s<0.01) return '$'+s.toFixed(3); if(s<0.1) return '$'+s.toFixed(3); return '$'+s.toFixed(2); }
 
 async function load(){
   const p = new URLSearchParams({action:'list_models', q:filters.q, source:filters.source, only_new:filters.only_new?1:0, sort:filters.sort, dir:filters.dir});
@@ -211,7 +211,7 @@ function render(meta){
     const intel = r.intelligence;
     const intelStr = intel===null ? '<span class="text-muted text-[12px]">待评分</span>' : `<span class="font-mono font-semibold">${Number(intel).toFixed(1)}</span>`;
     const pct = intel===null?0:Math.min(100, (intel/56)*100);
-    const platform = r.source==='opencode' ? `<span class="tag bg-slate-900 text-white">Go $${r.budget||60}</span>` : `<span class="tag bg-amber-500 text-white">GOAT $${r.budget||20}</span>`;
+    const platform = r.source==='opencode' ? '<span class="tag bg-slate-900 text-white">Go</span>' : '<span class="tag bg-amber-500 text-white">GOAT</span>';
     const cacheClass = r.cache_read_price===null ? 'text-muted' : (r.cache_read_price<=0.02 ? 'text-emerald-600 font-semibold' : (r.cache_read_price>=0.1 ? 'text-red-600' : 'text-amber-600'));
     const pricing = r.source==='opencode'
       ? `<span class="font-mono text-[12px]">${fmt(r.req_month)}/月 <span class="text-[11px] text-muted">预算$${r.budget||60}</span></span><div class="text-[11px] text-muted font-mono">${fmt(r.req_5h)}/5h</div>`
@@ -237,7 +237,7 @@ function render(meta){
       <td class="px-3 py-3 hide-mobile font-mono text-[12px]">${r.context||'1M'}</td>
       <td class="px-3 py-3 hide-mobile font-mono text-[12px]">${r.tps? r.tps+' tok/s' : '<span class="text-muted">—</span>'}</td>
       <td class="px-3 py-3">${pricing}</td>
-      <td class="px-3 py-3"><span class="font-mono font-semibold">${fmt(r.req_month||0)}</span><span class="text-[11px] text-muted"> /月</span><div class="text-[11px] text-muted font-mono">${fmt(r.req_5h||0)}/5h</div></td>
+      <td class="px-3 py-3 bg-amber-50/50 border-l border-amber-200"><div class="font-mono font-bold text-[14px] text-amber-700">${fmt(r.req_month||0)}/月</div><div class="text-[11px] font-mono text-muted">$${r.budget|| (r.source==='opencode'?60:20)}预算 · ${fmt(r.req_5h||0)}/5h</div></td>
       <td class="px-3 py-3"><span class="inline-flex items-center gap-2"><span class="w-2 h-2 rounded-full ${valueColor}"></span><span class="font-semibold">${valueLabel}</span></span><div class="text-[11px] text-muted font-mono">${value.toFixed(0)}</div></td>
     </tr>`;
   }).join('');
