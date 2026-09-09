@@ -14,10 +14,30 @@ if ($action === 'list_models') {
     $q = trim((string)($_GET['q'] ?? ''));
     $source = trim((string)($_GET['source'] ?? ''));
     $only_new = (string)($_GET['only_new'] ?? '') === '1';
-    $sort = preg_replace('/[^a-z_]/','', (string)($_GET['sort'] ?? 'value'));
+    $sort = preg_replace('/[^a-z_,]/','', (string)($_GET['sort'] ?? 'value'));
     $dir = strtolower((string)($_GET['dir'] ?? 'desc')) === 'asc' ? 'ASC' : 'DESC';
     $sortMap = ['value'=>'value_score','intelligence'=>'intelligence','req_month'=>'req_month','tps'=>'tps','price'=>'input_price','input'=>'input_price','output'=>'output_price','cache'=>'cache_read_price','budget'=>'budget','cost'=>'cost_per_req','updated'=>'updated_at',];
-    $orderCol = $sortMap[$sort] ?? 'value_score';
+    // multi-sort: sort=col1,col2 dir=dir1,dir2 (max 2)
+    $sortCols = array_values(array_filter(array_map('trim', explode(',', $sort))));
+    if (empty($sortCols)) $sortCols = ['value'];
+    $dirParts = array_map('trim', explode(',', strtolower((string)($_GET['dir'] ?? 'desc'))));
+    $orderParts = [];
+    foreach(array_slice($sortCols,0,2) as $i=>$sc){
+        $sc = preg_replace('/[^a-z_]/','', $sc);
+        $col = $sortMap[$sc] ?? 'value_score';
+        $d = (isset($dirParts[$i]) && $dirParts[$i]==='asc') ? 'ASC' : ((isset($dirParts[0]) && $dirParts[0]==='asc' && !isset($dirParts[$i])) ? 'ASC' : 'DESC');
+        // default dir per column if only one dir given: output/cache asc, others desc
+        if (count($dirParts)===1 && $i===1) { $d = in_array($sc,['output','cache','input','price','cost']) ? 'ASC' : 'DESC'; }
+        if ($col === 'cache_read_price') $orderParts[] = "COALESCE(cache_read_price,999) $d";
+        elseif ($col === 'input_price' || $col === 'output_price') $orderParts[] = "COALESCE($col,999) $d";
+        elseif ($col === 'cost_per_req') $orderParts[] = "cost_per_req $d";
+        else $orderParts[] = "$col $d";
+    }
+    // always tie-break by intelligence desc unless already included
+    $hasIntel = in_array('intelligence', array_slice($sortCols,0,2));
+    if (!$hasIntel) $orderParts[] = "intelligence DESC";
+    $orderSql = implode(', ', $orderParts);
+    $orderCol = $sortMap[preg_replace('/[^a-z_]/','', $sortCols[0])] ?? 'value_score';
     // multi filters
     $min_intel = isset($_GET['min_intel']) && $_GET['min_intel']!=='' ? (float)$_GET['min_intel'] : null;
     $min_req = isset($_GET['min_req']) && $_GET['min_req']!=='' ? (int)$_GET['min_req'] : null;
@@ -51,7 +71,7 @@ if ($action === 'list_models') {
           WHEN input_price IS NULL THEN 0
           ELSE MAX(COALESCE(intelligence,0)-30,0) / ((input_price*800 + output_price*200 + COALESCE(cache_read_price,0)*50000)/1000000 + 0.0001)
         END as value_score
-        FROM models $whereSql ORDER BY $orderSql, intelligence DESC";
+        FROM models $whereSql ORDER BY $orderSql";
     $stmt = db()->prepare($sql);
     $stmt->execute($args);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);

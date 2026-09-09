@@ -113,7 +113,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
       </div>
     </div>
     <div class="flex items-center gap-2 text-[12px] text-muted flex-wrap">
-      <span>点击表头直接排序 ↓</span>
+      <span>点击表头排序 · <b>Shift+点击</b>加第二条件</span><span id="sortHint" class="text-sky-700 font-medium"></span>
       <span class="ml-auto hidden md:inline">共 <b id="total" class="text-ink">—</b> 个模型 · 已筛选 <b id="filtered" class="text-ink">—</b></span>
     </div>
   </div>
@@ -153,19 +153,20 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
 const $ = s=>document.querySelector(s);
 const tbody = $('#tbody');
 let data = [];
-let filters = {q:'', source:'opencode', only_new:false, sort:'value', dir:'desc'};
+let filters = {q:'', source:'opencode', only_new:false, sorts:[{col:'value',dir:'desc'}]};
 
 function fmt(n){ if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(n>=10000?0:1)+'k'; return String(n); }
 function price(v){ if(v===null||v===undefined) return '<span class="text-muted">—</span>'; if(v===0) return '<span class="tag bg-emerald-500 text-white">FREE</span>'; let s=Number(v); if(s<0.01) return '$'+s.toFixed(3); if(s<0.1) return '$'+s.toFixed(3); return '$'+s.toFixed(2); }
 
 async function load(){
-  const p = new URLSearchParams({action:'list_models', q:filters.q, source:filters.source, only_new:filters.only_new?1:0, sort:filters.sort, dir:filters.dir});
+  const p = new URLSearchParams({action:'list_models', q:filters.q, source:filters.source, only_new:filters.only_new?1:0, sort:filters.sorts.map(s=>s.col).join(','), dir:filters.sorts.map(s=>s.dir).join(',')});
   const r = await fetch('api.php?'+p.toString());
   const j = await r.json();
   if(!j.ok){ tbody.innerHTML='<tr><td colspan=9 class="px-6 py-8 text-center text-red-600">'+j.error+'</td></tr>'; return; }
   data = j.data.rows;
   // no client filter, server-side only
   render(j.data);
+  updateSortBadges();
 }
 
 function render(meta){
@@ -242,11 +243,39 @@ $('#btnNew').addEventListener('click',()=>{
 });
 $('#q').addEventListener('input', e=>{ filters.q=e.target.value; clearTimeout(window._t); window._t=setTimeout(load,300); });
 
-document.querySelectorAll('.sortable').forEach(th=>{
-  th.addEventListener('click',()=>{
+function defaultDir(col){ return (col==='output'||col==='cache') ? 'asc' : 'desc'; }
+function updateSortBadges(){
+  document.querySelectorAll('.sortable').forEach(th=>{
     const s=th.dataset.sort;
-    if(filters.sort===s) filters.dir = filters.dir==='desc'?'asc':'desc';
-    else { filters.sort=s; filters.dir = (s==='output'||s==='cache') ? 'asc' : 'desc'; }
+    const idx = filters.sorts.findIndex(x=>x.col===s);
+    let badge = th.querySelector('.sort-badge');
+    if(!badge){ badge=document.createElement('span'); badge.className='sort-badge text-[10px] ml-1'; th.appendChild(badge); }
+    if(idx===-1){ badge.textContent='↕'; badge.className='sort-badge text-[10px] ml-1 text-muted'; }
+    else{
+      const arrow = filters.sorts[idx].dir==='desc' ? '↓' : '↑';
+      badge.textContent = (filters.sorts.length>1 ? (idx+1)+'\uFE0F\u20E3'+arrow : arrow);
+      badge.className='sort-badge text-[10px] ml-1 font-bold '+(idx===0?'text-amber-600':'text-sky-600');
+    }
+  });
+  const hint = filters.sorts.map((s,i)=>(i+1)+'.'+s.col+s.dir).join(' ');
+  const el=document.getElementById('sortHint'); if(el) el.textContent = filters.sorts.length>1 ? '多重: '+filters.sorts.map((s,i)=>((i===0?'①':'②')+s.col+(s.dir==='desc'?'↓':'↑'))).join(' → ') : '';
+}
+document.querySelectorAll('.sortable').forEach(th=>{
+  th.addEventListener('click',(e)=>{
+    const s=th.dataset.sort;
+    if(e.shiftKey){
+      const idx = filters.sorts.findIndex(x=>x.col===s);
+      if(idx!==-1){ filters.sorts[idx].dir = filters.sorts[idx].dir==='desc'?'asc':'desc'; }
+      else{
+        filters.sorts.push({col:s, dir:defaultDir(s)});
+        if(filters.sorts.length>2) filters.sorts.shift();
+      }
+    }else{
+      const idx = filters.sorts.findIndex(x=>x.col===s);
+      if(filters.sorts.length===1 && idx===0){ filters.sorts[0].dir = filters.sorts[0].dir==='desc'?'asc':'desc'; }
+      else{ filters.sorts=[{col:s, dir:defaultDir(s)}]; }
+    }
+    updateSortBadges();
     load();
   });
 });
