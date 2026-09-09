@@ -16,14 +16,28 @@ if ($action === 'list_models') {
     $only_new = (string)($_GET['only_new'] ?? '') === '1';
     $sort = preg_replace('/[^a-z_]/','', (string)($_GET['sort'] ?? 'value'));
     $dir = strtolower((string)($_GET['dir'] ?? 'desc')) === 'asc' ? 'ASC' : 'DESC';
-    $sortMap = ['value'=>'value_score','intelligence'=>'intelligence','req_month'=>'req_month','tps'=>'tps','price'=>'input_price','cache'=>'cache_read_price','updated'=>'updated_at',];
+    $sortMap = ['value'=>'value_score','intelligence'=>'intelligence','req_month'=>'req_month','tps'=>'tps','price'=>'input_price','input'=>'input_price','output'=>'output_price','cache'=>'cache_read_price','budget'=>'budget','cost'=>'cost_per_req','updated'=>'updated_at',];
     $orderCol = $sortMap[$sort] ?? 'value_score';
+    // multi filters
+    $min_intel = isset($_GET['min_intel']) && $_GET['min_intel']!=='' ? (float)$_GET['min_intel'] : null;
+    $min_req = isset($_GET['min_req']) && $_GET['min_req']!=='' ? (int)$_GET['min_req'] : null;
+    $max_cache = isset($_GET['max_cache']) && $_GET['max_cache']!=='' ? (float)$_GET['max_cache'] : null;
+    $max_input = isset($_GET['max_input']) && $_GET['max_input']!=='' ? (float)$_GET['max_input'] : null;
+    $max_budget = isset($_GET['max_budget']) && $_GET['max_budget']!=='' ? (float)$_GET['max_budget'] : null;
     $where=[]; $args=[];
     if ($q !== '') { $where[]='(display_name LIKE ? OR model_id LIKE ?)'; $args[]="%$q%"; $args[]="%$q%"; }
     if ($source !== '' && in_array($source, ['opencode','commandcode'])) { $where[]='source=?'; $args[]=$source; }
     if ($only_new) { $where[]='is_new=1'; }
+    if ($min_intel!==null) { $where[]='COALESCE(intelligence,0) >= CAST(? AS REAL)'; $args[]=$min_intel; }
+    if ($min_req!==null) { $where[]='COALESCE(req_month,0) >= CAST(? AS INTEGER)'; $args[]=$min_req; }
+    if ($max_cache!==null) { $where[]='(cache_read_price IS NOT NULL AND cache_read_price <= CAST(? AS REAL))'; $args[]=$max_cache; }
+    if ($max_input!==null) { $where[]='(input_price IS NOT NULL AND input_price <= CAST(? AS REAL))'; $args[]=$max_input; }
+    if ($max_budget!==null) { $where[]='(budget IS NOT NULL AND budget <= CAST(? AS REAL))'; $args[]=$max_budget; }
     $whereSql = $where ? ('WHERE '.implode(' AND ',$where)) : '';
-    $orderSql = ($orderCol === 'cache_read_price') ? "COALESCE(cache_read_price,999) $dir" : "$orderCol $dir";
+    if ($orderCol === 'cache_read_price') $orderSql = "COALESCE(cache_read_price,999) $dir";
+    elseif ($orderCol === 'input_price' || $orderCol === 'output_price') $orderSql = "COALESCE($orderCol,999) $dir";
+    elseif ($orderCol === 'cost_per_req') $orderSql = "cost_per_req $dir";
+    else $orderSql = "$orderCol $dir";
     $sql = "SELECT *,
         CASE
           WHEN (input_price=0 AND output_price=0) THEN 0.00001
