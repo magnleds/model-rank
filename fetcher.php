@@ -22,14 +22,14 @@ function normalize_id(string $id): string {
 $GOAT_BUDGETS = [
   "tencent/hy4-preview"=>20, "tencent/hy3-paid"=>70, "kimi-k3"=>20, "kimi-k2.7-code"=>60, "kimi-k2.7-code-highspeed"=>20, "kimi-k2.6"=>20, "kimi-k2.5"=>20,
   "glm-5.3-flash"=>40, "glm-5.3"=>20, "glm-5.2"=>70, "glm-5.2-fast"=>20, "glm-5.1"=>20, "glm-5"=>20,
-  "minimax-m3"=>47, "minimax-m2.7"=>20, "minimax-m2.5"=>20, "deepseek-v4-flash-fast"=>20, "qwen-3.8-max-0902"=>20, "qwen-3.8-max"=>20, "qwen-3.8-27b"=>70,
+  "minimax-m3"=>47, "minimax-m2.7"=>20, "minimax-m2.5"=>20, "deepseek-v4-flash-fast"=>30, "qwen-3.8-max-0902"=>20, "qwen-3.8-max"=>20, "qwen-3.8-27b"=>70,
   "qwen-3.6-max"=>20, "qwen-3.7-max"=>33, "qwen-3.8-flash"=>20, "step-3.7-flash"=>20, "step-3.5-flash"=>20,
   "mimo-v2.5-pro"=>20, "mimo-v2.5"=>30, "nemotron-3-ultra"=>20, "inkling-small"=>20,
   "claude-fable-5-1"=>20, "claude-fable-5"=>20, "claude-opus-5"=>20, "claude-opus-4-8"=>20, "claude-opus-4-7"=>20, "claude-opus-4-6"=>20, "claude-sonnet-5"=>20, "claude-sonnet-4-6"=>20, "claude-haiku-4-5"=>20,
   "gpt-5.5"=>20, "gpt-5.4"=>20, "gpt-5.4-mini"=>20, "gpt-5.3-codex"=>20,
   "gemini-3.8-flash"=>40, "gemini-3.7-flash"=>40, "gemini-3.6-flash"=>20, "gemini-3.5-flash"=>20, "gemini-3.5-flash-lite"=>20, "gemini-3.1-flash-lite"=>20, "fugu-ultra"=>20,
   "muse-spark-1.1"=>20, "muse-spark-1.2"=>20, "muse-spark-1.2-contributor"=>20, "muse-spark-1.3"=>20, "muse-spark-1.3-contributor"=>20, "grok-4.5"=>20,
-  "deepseek-v4-pro"=>20, "deepseek-v4-flash"=>20, "deepseek-v4-flash-vision-exp"=>20,
+  "deepseek-v4-pro"=>15, "deepseek-v4-flash"=>30, "deepseek-v4-flash-vision-exp"=>15,
   "qwen-3.7-plus"=>20, "qwen-3.6-plus"=>20, "qwen-3.7-flash"=>20, "grok-4-6"=>20, "hy4-preview"=>20, "tencent-hy3"=>70, "inkling"=>20,
 ];
 function goat_budget(string $mid): int {
