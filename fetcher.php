@@ -19,114 +19,72 @@ function http_get(string $url, int $timeout=12): ?string {
 function normalize_id(string $id): string {
     return strtolower(str_replace(['.', '_'], '-', $id));
 }
-$GOAT_BUDGETS = [
-  "tencent/hy4-preview"=>20, "tencent/hy3-paid"=>70, "kimi-k3"=>20, "kimi-k2.7-code"=>60, "kimi-k2.7-code-highspeed"=>20, "kimi-k2.6"=>20, "kimi-k2.5"=>20,
-  "glm-5.3-flash"=>40, "glm-5.3"=>20, "glm-5.2"=>70, "glm-5.2-fast"=>20, "glm-5.1"=>20, "glm-5"=>20,
-  "minimax-m3"=>47, "minimax-m2.7"=>20, "minimax-m2.5"=>20, "deepseek-v4-flash-fast"=>30, "qwen-3.8-max-0902"=>20, "qwen-3.8-max"=>20, "qwen-3.8-27b"=>70,
-  "qwen-3.6-max"=>20, "qwen-3.7-max"=>33, "qwen-3.8-flash"=>20, "step-3.7-flash"=>20, "step-3.5-flash"=>20,
-  "mimo-v2.5-pro"=>20, "mimo-v2.5"=>30, "nemotron-3-ultra"=>20, "inkling-small"=>20,
-  "claude-fable-5-1"=>20, "claude-fable-5"=>20, "claude-opus-5"=>20, "claude-opus-4-8"=>20, "claude-opus-4-7"=>20, "claude-opus-4-6"=>20, "claude-sonnet-5"=>20, "claude-sonnet-4-6"=>20, "claude-haiku-4-5"=>20,
-  "gpt-5.5"=>20, "gpt-5.4"=>20, "gpt-5.4-mini"=>20, "gpt-5.3-codex"=>20,
-  "gemini-3.8-flash"=>40, "gemini-3.7-flash"=>40, "gemini-3.6-flash"=>20, "gemini-3.5-flash"=>20, "gemini-3.5-flash-lite"=>20, "gemini-3.1-flash-lite"=>20, "fugu-ultra"=>20,
-  "muse-spark-1.1"=>20, "muse-spark-1.2"=>20, "muse-spark-1.2-contributor"=>20, "muse-spark-1.3"=>20, "muse-spark-1.3-contributor"=>20, "grok-4.5"=>20,
-  "deepseek-v4-pro"=>15, "deepseek-v4-flash"=>30, "deepseek-v4-flash-vision-exp"=>15,
-  "qwen-3.7-plus"=>20, "qwen-3.6-plus"=>20, "qwen-3.7-flash"=>20, "grok-4-6"=>20, "hy4-preview"=>20, "tencent-hy3"=>70, "inkling"=>20,
-];
-function goat_budget(string $mid): int {
-  global $GOAT_BUDGETS;
-  $low = strtolower($mid);
-  if (isset($GOAT_BUDGETS[$low])) return $GOAT_BUDGETS[$low];
-  $norm = normalize_id($low);
-  if (isset($GOAT_BUDGETS[$norm])) return $GOAT_BUDGETS[$norm];
-  $parts = explode('/', $low);
-  $base = strtolower(str_replace(['.', '_'], '-', end($parts)));
-  if (isset($GOAT_BUDGETS[$base])) return $GOAT_BUDGETS[$base];
-  foreach($GOAT_BUDGETS as $k=>$v){
-    $kb = normalize_id(explode('/', $k)[count(explode('/', $k))-1]);
-    if ($kb === $norm || $kb === $base) return $v;
-  }
-  return 20;
+function opencode_pricing(): array {
+    return [
+        'grok-4.6'=>['in'=>2.00,'out'=>6.00,'cache'=>0.50,'cachew'=>null,'budget'=>15],
+        'grok-4-6'=>['in'=>2.00,'out'=>6.00,'cache'=>0.50,'cachew'=>null,'budget'=>15],
+        'gpt-5.6-luna'=>['in'=>0.20,'out'=>1.20,'cache'=>0.02,'cachew'=>0.25,'budget'=>15],
+        'glm-5.3-flash'=>['in'=>0.15,'out'=>0.50,'cache'=>0.03,'cachew'=>null,'budget'=>15],
+        'glm-5.3'=>['in'=>1.40,'out'=>4.40,'cache'=>0.26,'cachew'=>null,'budget'=>15],
+        'glm-5.2'=>['in'=>1.40,'out'=>4.40,'cache'=>0.26,'cachew'=>null,'budget'=>60],
+        'glm-5.1'=>['in'=>1.40,'out'=>4.40,'cache'=>0.26,'cachew'=>null,'budget'=>60],
+        'glm-5'=>['in'=>1.40,'out'=>4.40,'cache'=>0.26,'cachew'=>null,'budget'=>60],
+        'kimi-k3'=>['in'=>3.00,'out'=>15.00,'cache'=>0.30,'cachew'=>null,'budget'=>15],
+        'kimi-k2.7-code'=>['in'=>0.95,'out'=>4.00,'cache'=>0.19,'cachew'=>null,'budget'=>60],
+        'kimi-k2.6'=>['in'=>0.95,'out'=>4.00,'cache'=>0.16,'cachew'=>null,'budget'=>60],
+        'longcat-2.0'=>['in'=>0.30,'out'=>1.20,'cache'=>0.006,'cachew'=>null,'budget'=>60],
+        'mimo-v2.5'=>['in'=>0.14,'out'=>0.28,'cache'=>0.0028,'cachew'=>null,'budget'=>60],
+        'mimo-v2.5-pro'=>['in'=>0.435,'out'=>0.87,'cache'=>0.003625,'cachew'=>null,'budget'=>15],
+        'minimax-m3'=>['in'=>0.30,'out'=>1.20,'cache'=>0.06,'cachew'=>null,'budget'=>60],
+        'minimax-m2.7'=>['in'=>0.30,'out'=>1.20,'cache'=>0.06,'cachew'=>0.375,'budget'=>60],
+        'minimax-m2.5'=>['in'=>0.30,'out'=>1.20,'cache'=>0.06,'cachew'=>0.375,'budget'=>60],
+        'muse-spark-1.3-contributor'=>['in'=>0.10,'out'=>0.20,'cache'=>0.002,'cachew'=>null,'budget'=>60],
+        'muse-spark-1.2-contributor'=>['in'=>0.10,'out'=>0.20,'cache'=>0.002,'cachew'=>null,'budget'=>60],
+        'qwen3.8-max'=>['in'=>2.00,'out'=>6.00,'cache'=>0.25,'cachew'=>2.50,'budget'=>60],
+        'qwen3.8-flash'=>['in'=>0.16,'out'=>0.47,'cache'=>0.016,'cachew'=>null,'budget'=>60],
+        'qwen3.7-max'=>['in'=>2.50,'out'=>7.50,'cache'=>0.50,'cachew'=>3.13,'budget'=>60],
+        'qwen3.7-plus'=>['in'=>0.40,'out'=>1.60,'cache'=>0.08,'cachew'=>0.50,'budget'=>60],
+        'qwen3.6-plus'=>['in'=>0.50,'out'=>3.00,'cache'=>0.10,'cachew'=>null,'budget'=>60],
+        'deepseek-v4-pro'=>['in'=>0.66,'out'=>1.98,'cache'=>0.022,'cachew'=>null,'budget'=>60],
+        'deepseek-v4-flash'=>['in'=>0.22,'out'=>0.66,'cache'=>0.007,'cachew'=>null,'budget'=>60],
+        'deepseek-v4-flash-vision-exp'=>['in'=>0.22,'out'=>0.66,'cache'=>0.007,'cachew'=>null,'budget'=>60],
+        'hy4-preview'=>['in'=>0.834,'out'=>2.501,'cache'=>0.042,'cachew'=>null,'budget'=>60],
+        'hy3'=>['in'=>0.14,'out'=>0.58,'cache'=>0.035,'cachew'=>null,'budget'=>60],
+        'omen-alpha'=>['in'=>0.30,'out'=>1.20,'cache'=>0.06,'cachew'=>null,'budget'=>60],
+    ];
 }
 function parse_opencode(): array {
-    $pricing = [
-        'grok-4.6'=>[169,423,845],
-        'grok-4-5'=>[169,423,845],
-        'mimo-v2-pro'=>[3250,8150,16300],
-        'mimo-v2-omni'=>[3250,8150,16300],
-        'minimax-m2-5'=>[3400,8500,17000],
-        'qwen3-5-plus'=>[3300,8200,16300],
-        'mimo-v2-5'=>[30100,75200,150400],
-        'gpt-5.6-luna'=>[2050,5100,10250],
-        'glm-5.3-flash'=>[1580,3950,7900],
-        'glm-5.3'=>[220,540,1080],
-        'glm-5.2'=>[880,2150,4300],
-        'glm-5.1'=>[880,2150,4300],
-        'glm-5'=>[880,2150,4300],
-        'kimi-k3'=>[110,250,490],
-        'kimi-k2.7-code'=>[1350,3380,6750],
-        'kimi-k2.6'=>[1150,2880,5750],
-        'longcat-2.0'=>[11400,28600,57200],
-        'mimo-v2.5'=>[30100,75200,150400],
-        'mimo-v2.5-pro'=>[3250,8150,16300],
-        'minimax-m3'=>[3200,8000,16000],
-        'minimax-m2.7'=>[3400,8500,17000],
-        'muse-spark-1.3-contributor'=>[45300,113300,226600],
-        'muse-spark-1-2-contributor'=>[45300,113300,226600],
-        'muse-spark-1.2-contributor'=>[45300,113300,226600],
-        'qwen3.8-max'=>[160,400,810],
-        'qwen3.8-flash'=>[5400,13500,27000],
-        'qwen3.7-max'=>[170,420,840],
-        'qwen3.7-plus'=>[4300,10800,21600],
-        'qwen3.6-plus'=>[3300,8200,16300],
-        'deepseek-v4-pro'=>[1050,2600,5200],
-        'deepseek-v4-flash'=>[7600,18900,37800],
-        'deepseek-v4-flash-vision-exp'=>[3800,9450,18900],
-        'hy4-preview'=>[1350,3380,6770],
-        'hy3'=>[4300,10750,21500],
-        'omen-alpha'=>[11600,29000,57900],
-    ];
+    $pricing = opencode_pricing();
     $json = http_get('https://opencode.ai/zen/go/v1/models');
     $ids = [];
     if ($json) {
         $data = json_decode($json, true);
         if (isset($data['data']) && is_array($data['data'])) {
-            foreach ($data['data'] as $m) if (!empty($m['id'])) $ids[] = strtolower($m['id']);
+            foreach ($data['data'] as $m) if (!empty($m['id'])) $ids[] = normalize_id($m['id']);
         }
     }
     if (empty($ids)) $ids = array_keys($pricing);
-    // live docs parse for pricing
-    $html = http_get('https://opencode.ai/docs/go');
-    if ($html) {
-        if (preg_match_all('/<td[^>]*>\s*([a-z0-9\.\-]+)\s*<\/td>\s*<td[^>]*>\s*([\d,]+)\s*<\/td>\s*<td[^>]*>\s*([\d,]+)\s*<\/td>\s*<td[^>]*>\s*([\d,]+)\s*<\/td>/i', $html, $mm)) {
-            foreach ($mm[1] as $i=>$mid) {
-                $mid = normalize_id(trim($mid));
-                if (isset($pricing[$mid])) {
-                    $pricing[$mid] = [(int)str_replace(',','',$mm[2][$i]), (int)str_replace(',','',$mm[3][$i]), (int)str_replace(',','',$mm[4][$i])];
-                } else {
-                    // add unknown
-                    $pricing[$mid] = [(int)str_replace(',','',$mm[2][$i]), (int)str_replace(',','',$mm[3][$i]), (int)str_replace(',','',$mm[4][$i])];
-                    $ids[] = $mid;
-                }
-            }
-        }
-    }
-    $ids = array_unique($ids);
     $out=[];
-    foreach($ids as $id){
+    foreach(array_unique($ids) as $id){
         $norm = normalize_id($id);
-        $p = $pricing[$norm] ?? $pricing[$id] ?? [0,0,0];
+        $pr = $pricing[$norm] ?? $pricing[$id] ?? null;
+        if (!$pr) continue;
+        $cost = ($pr['in']*800 + $pr['out']*200 + $pr['cache']*50000)/1000000;
+        if ($cost<=0) $cost=0.0001;
+        $req_month = (int)($pr['budget'] / $cost);
         $out[]=[
             'source'=>'opencode',
             'model_id'=>$norm,
             'display_name'=>ucwords(str_replace(['-','.'],' ', $norm)),
             'context'=>'1M',
-            'req_5h'=>$p[0],
-            'req_week'=>$p[1],
-            'req_month'=>$p[2],
-            'budget'=>60,
-            'input_price'=>null,
-            'output_price'=>null,
-            'cache_read_price'=>null,
+            'req_5h'=>(int)($req_month*12/60),
+            'req_week'=>(int)($req_month*30/60),
+            'req_month'=>$req_month,
+            'budget'=>$pr['budget'],
+            'input_price'=>$pr['in'],
+            'output_price'=>$pr['out'],
+            'cache_read_price'=>$pr['cache'],
+            'cache_write_price'=>$pr['cachew'],
             'intelligence'=>null,
             'tps'=>null,
         ];
@@ -185,8 +143,6 @@ function parse_commandcode(): array {
                 ];
                 // calc req based on GOAT $70 pool but capped per-model allowance logic:
                 // For now use $70 for all, but for free use large
-                $budget = goat_budget($mid);
-                $out_item['budget']=$budget;
                 if ($inp===null && $outp===null) {
                     $out_item['req_month']=0; $out_item['req_5h']=0; $out_item['req_week']=0;
                 } elseif ($inp===0.0 && $outp===0.0) {
@@ -194,7 +150,8 @@ function parse_commandcode(): array {
                 } else {
                     $cost = ($inp*800 + $outp*200 + ($cache??0)*50000)/1000000;
                     if ($cost <= 0) $cost = 0.0001;
-                    $req_month = (int)($budget / $cost);
+                    // GOAT also has per-model budget, but use $70 for ranking; real额度 may be capped at $20 for some, but ranking uses $70 to reflect max
+                    $req_month = (int)(70 / $cost);
                     $out_item['req_month']=$req_month;
                     $out_item['req_5h']=(int)($req_month*14/70);
                     $out_item['req_week']=(int)($req_month*35/70);
@@ -265,14 +222,14 @@ function do_refresh(string $actor='cron', string $type='auto'): array {
         if ($ex) {
             $first = (int)$ex['first_seen_at'];
             $is_new_flag = ($now - $first) < 7*86400 ? 1 : 0;
-            $upd = db()->prepare("UPDATE models SET display_name=?, context=?, intelligence=?, tps=?, input_price=?, output_price=?, cache_read_price=?, req_5h=?, req_week=?, req_month=?, budget=?, updated_at=?, is_new=?, is_free=?, raw_json=? WHERE id=?");
-            $upd->execute([$m['display_name'], $m['context']??'1M', $m['intelligence'], $m['tps'],$m['input_price'],$m['output_price'],$m['cache_read_price'],$m['req_5h']??0,$m['req_week']??0,$m['req_month']??0,$m['budget']??($m['source']==='opencode'?60:20),$now,$is_new_flag,$m['is_free']??0,json_encode($m,JSON_UNESCAPED_UNICODE),$ex['id']]);
+            $upd = db()->prepare("UPDATE models SET display_name=?, context=?, intelligence=?, tps=?, input_price=?, output_price=?, cache_read_price=?, req_5h=?, req_week=?, req_month=?, updated_at=?, is_new=?, is_free=?, raw_json=? WHERE id=?");
+            $upd->execute([$m['display_name'], $m['context']??'1M', $m['intelligence'], $m['tps'],$m['input_price'],$m['output_price'],$m['cache_read_price'],$m['req_5h']??0,$m['req_week']??0,$m['req_month']??0,$now,$is_new_flag,$m['is_free']??0,json_encode($m,JSON_UNESCAPED_UNICODE),$ex['id']]);
             $updated++;
         } else {
             $firstSeen = $wasEmpty ? $baselineTime : $now;
             $is_new_flag = $wasEmpty ? 0 : 1;
-            $ins = db()->prepare("INSERT INTO models(source,model_id,display_name,context,intelligence,tps,input_price,output_price,cache_read_price,req_5h,req_week,req_month,budget,first_seen_at,updated_at,is_new,is_free,raw_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-            $ins->execute([$src,$mid,$m['display_name'],$m['context']??'1M',$m['intelligence'],$m['tps'],$m['input_price'],$m['output_price'],$m['cache_read_price'],$m['req_5h']??0,$m['req_week']??0,$m['req_month']??0,$m['budget']??($m['source']==='opencode'?60:20),$firstSeen,$now,$is_new_flag,$m['is_free']??0,json_encode($m,JSON_UNESCAPED_UNICODE)]);
+            $ins = db()->prepare("INSERT INTO models(source,model_id,display_name,context,intelligence,tps,input_price,output_price,cache_read_price,req_5h,req_week,req_month,first_seen_at,updated_at,is_new,is_free,raw_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            $ins->execute([$src,$mid,$m['display_name'],$m['context']??'1M',$m['intelligence'],$m['tps'],$m['input_price'],$m['output_price'],$m['cache_read_price'],$m['req_5h']??0,$m['req_week']??0,$m['req_month']??0,$firstSeen,$now,$is_new_flag,$m['is_free']??0,json_encode($m,JSON_UNESCAPED_UNICODE)]);
             $inserted++;
         }
     }
