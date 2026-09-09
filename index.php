@@ -23,6 +23,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ModelRank · GOAT vs Go 性价比榜</title>
+<link rel="preconnect" href="https://cdn.tailwindcss.com">
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- fonts removed for speed, use system fonts -->
 <script>tailwind.config={theme:{extend:{fontFamily:{sans:['system-ui','-apple-system','PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC','sans-serif'],mono:['ui-monospace','SFMono-Regular','monospace']},colors:{ink:'#18181b',muted:'#52525b',line:'#e4e4e7',accent:'#2563eb',accent2:'#1d4ed8'}}}}</script>
@@ -31,13 +32,15 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
 .glass{backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .score-bar{height:6px;border-radius:9999px;background:#e4e4e7;overflow:hidden}
 .score-fill{height:100%;border-radius:9999px;transition:width .6s ease}
-.pill{border:1px solid #e4e4e7;padding:6px 12px;border-radius:9999px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.pill{border:1px solid #e4e4e7;padding:6px 12px;border-radius:9999px;font-size:13px;font-weight:500;cursor:pointer;transition:background-color .15s,color .15s,border-color .15s}
 .pill.active{background:#18181b;color:#fff;border-color:#18181b}
 .tag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:9999px;letter-spacing:.02em}
 .sortable{cursor:pointer;user-select:none}
 .sortable:hover{color:#18181b}
 .card{border:1px solid #e4e4e7;background:#fff;border-radius:12px}
 .tnum,.font-mono{font-variant-numeric:tabular-nums}
+#tbody tr{content-visibility:auto;contain-intrinsic-size:auto 60px}
+@media (prefers-reduced-motion:reduce){.animate-pulse{animation:none}.score-fill{transition:none}}
 @media(max-width:768px){.hide-mobile{display:none}}
 </style>
 </head>
@@ -108,8 +111,8 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
       </div>
       <div class="flex items-center gap-2">
         <div class="relative flex-1 md:w-[280px]">
-          <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-muted" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
-          <input id="q" placeholder="搜索模型，如 Muse Spark / DeepSeek" class="w-full pl-8 pr-3 py-2 rounded-full border border-line bg-[#fafafa] text-[13px] outline-none focus:border-blue-500 focus:bg-white">
+          <svg aria-hidden="true" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+          <input id="q" aria-label="搜索模型" placeholder="搜索模型，如 Muse Spark / DeepSeek" class="w-full pl-8 pr-3 py-2 rounded-full border border-line bg-[#fafafa] text-[13px] outline-none focus:border-blue-500 focus:bg-white">
         </div>
       </div>
     </div>
