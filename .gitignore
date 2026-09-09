@@ -1,0 +1,17 @@
+# Ignore everything in data/ except the deny-all .htaccess
+# The DB file is generated on first run
+data/*
+!data/.htaccess
+!data/.gitkeep
+
+# Config with secrets
+config.php
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
