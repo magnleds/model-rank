@@ -105,37 +105,15 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
         <button data-source="opencode" class="pill active">◆ OpenCode Go <span id="c-op" class="ml-1 text-muted">—</span></button>
         <button id="btnNew" class="pill">✦ 只看 NEW <span id="c-new" class="ml-1">—</span></button>
       </div>
-      <div class="flex items-center gap-2 flex-wrap">
-        <div class="relative flex-1 md:w-[220px] min-w-[180px]">
+      <div class="flex items-center gap-2">
+        <div class="relative flex-1 md:w-[280px]">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted">⌕</span>
           <input id="q" placeholder="搜索模型，如 Muse Spark / DeepSeek" class="w-full pl-8 pr-3 py-2 rounded-full border border-line bg-[#F8FAFC] text-[13px] outline-none focus:border-amber-400 focus:bg-white">
         </div>
-        <select id="sort" class="px-3 py-2 rounded-full border border-line bg-white text-[13px] font-medium">
-          <option value="value">排序 · 性价比 ★</option>
-          <option value="intelligence">排序 · 分数</option>
-          <option value="req_month">排序 · 月额度</option>
-          <option value="cache">排序 · 缓存便宜</option>
-          <option value="input">排序 · 输入价便宜</option>
-          <option value="output">排序 · 输出价便宜</option>
-          <option value="budget">排序 · 预算小</option>
-          <option value="tps">排序 · 速度</option>
-        </select>
-        <button id="btnDir" class="pill" title="切换升/降序">↓ 降序</button>
-        <button id="btnReset" class="pill">↺ 重置</button>
       </div>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[12px]">
-      <label class="flex items-center gap-2 bg-[#F8FAFC] border border-line rounded-full px-3 py-2">分数 <select id="fIntel" class="flex-1 bg-transparent outline-none font-medium"><option value="">全部</option><option value="30">≥30</option><option value="40" selected>≥40</option><option value="45">≥45</option><option value="50">≥50</option></select></label>
-      <label class="flex items-center gap-2 bg-[#F8FAFC] border border-line rounded-full px-3 py-2">额度 <select id="fReq" class="flex-1 bg-transparent outline-none font-medium"><option value="">全部</option><option value="5000">≥5k/月</option><option value="20000">≥20k/月</option><option value="50000">≥50k/月</option><option value="100000">≥100k/月</option></select></label>
-      <label class="flex items-center gap-2 bg-[#F8FAFC] border border-line rounded-full px-3 py-2">缓存≤ <select id="fCache" class="flex-1 bg-transparent outline-none font-medium"><option value="">不限</option><option value="0.01">$0.01</option><option value="0.05">$0.05</option><option value="0.1">$0.1</option><option value="0.5">$0.5</option></select></label>
-      <label class="flex items-center gap-2 bg-[#F8FAFC] border border-line rounded-full px-3 py-2">输入≤ <select id="fInput" class="flex-1 bg-transparent outline-none font-medium"><option value="">不限</option><option value="0.5">$0.5</option><option value="1">$1.0</option><option value="2">$2.0</option></select></label>
-    </div>
     <div class="flex items-center gap-2 text-[12px] text-muted flex-wrap">
-      <span>快捷：</span>
-      <button class="tag bg-white border border-line hover:border-ink" data-quick="high">高分 &gt;45</button>
-      <button class="tag bg-white border border-line hover:border-ink" data-quick="cheap">月 &gt;20k</button>
-      <button class="tag bg-white border border-line hover:border-ink" data-quick="free">Free</button>
-      <span id="activeFilters" class="text-amber-700 font-medium"></span>
+      <span>点击表头直接排序 ↓</span>
       <span class="ml-auto hidden md:inline">共 <b id="total" class="text-ink">—</b> 个模型 · 已筛选 <b id="filtered" class="text-ink">—</b></span>
     </div>
   </div>
@@ -149,11 +127,11 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
             <th class="text-left px-4 py-3 w-[48px]">#</th>
             <th class="text-left px-3 py-3 min-w-[220px]">模型</th>
             <th class="text-left px-3 py-3">平台</th>
-            <th class="sortable px-3 py-3 text-left" data-sort="intelligence">Intelligence <span class="text-[10px]">↕</span></th>
+            <th class="sortable px-3 py-3 text-left" data-sort="intelligence">分数 <span class="text-[10px]">↕</span></th>
             <th class="px-3 py-3 text-left hide-mobile">上下文</th>
-            <th class="sortable px-3 py-3 text-left hide-mobile" data-sort="tps">速度 <span class="text-[10px]">↕</span></th>
-            <th class="px-3 py-3 text-left min-w-[180px]">单价 / 1M <span class="text-[10px] text-muted">(含缓存)</span></th>
-            <th class="sortable px-3 py-3 text-left bg-amber-50" data-sort="req_month">月额度 <span class="text-[10px]">↕</span> <span class="text-[10px] text-amber-700 font-bold">★主要参考</span></th>
+            <th class="sortable px-3 py-3 text-left" data-sort="output">输出价 <span class="text-[10px]">↕</span></th>
+            <th class="sortable px-3 py-3 text-left" data-sort="cache">缓存 <span class="text-[10px]">↕</span></th>
+            <th class="sortable px-3 py-3 text-left bg-amber-50" data-sort="req_month">额度 <span class="text-[10px]">↕</span> <span class="text-[10px] text-amber-700 font-bold">★</span></th>
             <th class="sortable px-3 py-3 text-left" data-sort="value">性价比 <span class="text-[10px]">↕</span></th>
           </tr>
         </thead>
@@ -175,25 +153,18 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
 const $ = s=>document.querySelector(s);
 const tbody = $('#tbody');
 let data = [];
-let filters = {q:'', source:'opencode', only_new:false, sort:'value', dir:'desc', quick:new Set(), min_intel:'40', min_req:'', max_cache:'', max_input:''};
+let filters = {q:'', source:'opencode', only_new:false, sort:'value', dir:'desc'};
 
 function fmt(n){ if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(n>=10000?0:1)+'k'; return String(n); }
 function price(v){ if(v===null||v===undefined) return '<span class="text-muted">—</span>'; if(v===0) return '<span class="tag bg-emerald-500 text-white">FREE</span>'; let s=Number(v); if(s<0.01) return '$'+s.toFixed(3); if(s<0.1) return '$'+s.toFixed(3); return '$'+s.toFixed(2); }
 
 async function load(){
   const p = new URLSearchParams({action:'list_models', q:filters.q, source:filters.source, only_new:filters.only_new?1:0, sort:filters.sort, dir:filters.dir});
-  if(filters.min_intel) p.set('min_intel', filters.min_intel);
-  if(filters.min_req) p.set('min_req', filters.min_req);
-  if(filters.max_cache) p.set('max_cache', filters.max_cache);
-  if(filters.max_input) p.set('max_input', filters.max_input);
   const r = await fetch('api.php?'+p.toString());
   const j = await r.json();
   if(!j.ok){ tbody.innerHTML='<tr><td colspan=9 class="px-6 py-8 text-center text-red-600">'+j.error+'</td></tr>'; return; }
   data = j.data.rows;
-  // client quick filters (multi)
-  if(filters.quick.has('high')) data = data.filter(x=> (x.intelligence||0) >= 45);
-  if(filters.quick.has('cheap')) data = data.filter(x=> (x.req_month||0) >= 20000);
-  if(filters.quick.has('free')) data = data.filter(x=> x.is_free==1 || x.is_deal==1 || (x.input_price==0 && x.output_price==0));
+  // no client filter, server-side only
   render(j.data);
 }
 
@@ -228,9 +199,6 @@ function render(meta){
     const pct = intel===null?0:Math.min(100, (intel/56)*100);
     const platform = r.source==='opencode' ? '<span class="tag bg-slate-900 text-white">Go</span>' : '<span class="tag bg-amber-500 text-white">GOAT</span>';
     const cacheClass = r.cache_read_price===null ? 'text-muted' : (r.cache_read_price<=0.02 ? 'text-emerald-600 font-semibold' : (r.cache_read_price>=0.1 ? 'text-red-600' : 'text-amber-600'));
-    const pricing = r.source==='opencode'
-      ? `<span class="font-mono text-[12px]">${fmt(r.req_month)}/月 <span class="text-[11px] text-muted">预算$${r.budget||60}</span></span><div class="text-[11px] text-muted font-mono">${fmt(r.req_5h)}/5h</div>`
-      : `<span class="font-mono text-[12px]">${price(r.input_price)} → ${price(r.output_price)} <span class="${cacheClass}">cache ${price(r.cache_read_price)}</span></span><div class="text-[11px] text-muted">预算 $${r.budget||20} → ${fmt(r.req_month)}/月</div>`;
     const value = Number(r.value_score||0);
     const valueLabel = value>900 ? '极高' : value>400 ? '高' : value>150 ? '中' : '低';
     const valueColor = value>900?'bg-emerald-500':value>400?'bg-amber-500':value>150?'bg-slate-700':'bg-slate-300';
@@ -250,8 +218,8 @@ function render(meta){
         <div class="score-bar mt-1 w-[110px]"><div class="score-fill ${intel===null?'bg-slate-200': intel>48?'bg-emerald-500': intel>40?'bg-amber-500':'bg-slate-700'}" style="width:${pct}%"></div></div>
       </td>
       <td class="px-3 py-3 hide-mobile font-mono text-[12px]">${r.context||'1M'}</td>
-      <td class="px-3 py-3 hide-mobile font-mono text-[12px]">${r.tps? r.tps+' tok/s' : '<span class="text-muted">—</span>'}</td>
-      <td class="px-3 py-3">${pricing}</td>
+      <td class="px-3 py-3 font-mono text-[13px] font-semibold">${price(r.output_price)}</td>
+      <td class="px-3 py-3 font-mono text-[13px]"><span class="${cacheClass}">${price(r.cache_read_price)}</span></td>
       <td class="px-3 py-3 bg-amber-50/50 border-l border-amber-200"><div class="font-mono font-bold text-[14px] text-amber-700">${fmt(r.req_month||0)}/月</div><div class="text-[11px] font-mono text-muted">$${r.budget|| (r.source==='opencode'?60:20)}预算 · ${fmt(r.req_5h||0)}/5h</div></td>
       <td class="px-3 py-3"><span class="inline-flex items-center gap-2"><span class="w-2 h-2 rounded-full ${valueColor}"></span><span class="font-semibold">${valueLabel}</span></span><div class="text-[11px] text-muted font-mono">${value.toFixed(0)}</div></td>
     </tr>`;
@@ -274,55 +242,12 @@ $('#btnNew').addEventListener('click',()=>{
 });
 $('#q').addEventListener('input', e=>{ filters.q=e.target.value; clearTimeout(window._t); window._t=setTimeout(load,300); });
 $('#sort').addEventListener('change', e=>{ filters.sort=e.target.value; load(); });
-document.querySelectorAll('[data-quick]').forEach(b=>{
-  b.addEventListener('click',()=>{
-    const v=b.dataset.quick;
-    if(filters.quick.has(v)) { filters.quick.delete(v); b.classList.remove('!bg-ink','!text-white'); }
-    else { filters.quick.add(v); b.classList.add('!bg-ink','!text-white'); }
-    // sync to dropdowns
-    if(v==='high'){ filters.min_intel = filters.quick.has('high') ? '45' : ''; $('#fIntel').value = filters.min_intel; }
-    if(v==='cheap'){ filters.min_req = filters.quick.has('cheap') ? '20000' : ''; $('#fReq').value = filters.min_req; }
-    load();
-  });
-});
-['fIntel','fReq','fCache','fInput'].forEach(id=>{
-  document.getElementById(id).addEventListener('change', e=>{
-    const v=e.target.value;
-    if(id==='fIntel') filters.min_intel=v;
-    if(id==='fReq') filters.min_req=v;
-    if(id==='fCache') filters.max_cache=v;
-    if(id==='fInput') filters.max_input=v;
-    updateActive();
-    load();
-  });
-});
-$('#btnDir').addEventListener('click', ()=>{
-  filters.dir = filters.dir==='desc'?'asc':'desc';
-  $('#btnDir').textContent = filters.dir==='desc' ? '↓ 降序' : '↑ 升序';
-  load();
-});
-$('#btnReset').addEventListener('click', ()=>{
-  filters = {q:'', source:filters.source, only_new:false, sort:'value', dir:'desc', quick:new Set(), min_intel:'', min_req:'', max_cache:'', max_input:''};
-  $('#q').value=''; $('#sort').value='value'; $('#fIntel').value=''; $('#fReq').value=''; $('#fCache').value=''; $('#fInput').value='';
-  $('#btnNew').classList.remove('active'); $('#btnDir').textContent='↓ 降序';
-  document.querySelectorAll('[data-quick]').forEach(x=>x.classList.remove('!bg-ink','!text-white'));
-  updateActive(); load();
-});
-function updateActive(){
-  const parts=[];
-  if(filters.min_intel) parts.push('分数≥'+filters.min_intel);
-  if(filters.min_req) parts.push('额度≥'+fmt(filters.min_req));
-  if(filters.max_cache) parts.push('缓存≤$'+filters.max_cache);
-  if(filters.max_input) parts.push('输入≤$'+filters.max_input);
-  if(filters.only_new) parts.push('NEW');
-  document.getElementById('activeFilters').textContent = parts.length ? '已选: '+parts.join(' · ') : '';
-}
+
 document.querySelectorAll('.sortable').forEach(th=>{
   th.addEventListener('click',()=>{
     const s=th.dataset.sort;
     if(filters.sort===s) filters.dir = filters.dir==='desc'?'asc':'desc';
-    else { filters.sort=s; filters.dir='desc'; }
-    $('#sort').value = filters.sort;
+    else { filters.sort=s; filters.dir = (s==='output'||s==='cache') ? 'asc' : 'desc'; }
     load();
   });
 });
