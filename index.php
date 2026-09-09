@@ -25,29 +25,30 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
 <title>ModelRank · GOAT vs Go 性价比榜</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- fonts removed for speed, use system fonts -->
-<script>tailwind.config={theme:{extend:{fontFamily:{sans:['system-ui','-apple-system','sans-serif'],mono:['ui-monospace','SFMono-Regular','monospace']},colors:{ink:'#0F172A',muted:'#64748B',line:'#E2E8F0',accent:'#F59E0B',accent2:'#EA580C'}}}}</script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['system-ui','-apple-system','PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC','sans-serif'],mono:['ui-monospace','SFMono-Regular','monospace']},colors:{ink:'#18181b',muted:'#52525b',line:'#e4e4e7',accent:'#2563eb',accent2:'#1d4ed8'}}}}</script>
 <style>
 *{-webkit-font-smoothing:antialiased}
 .glass{backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.score-bar{height:6px;border-radius:9999px;background:#E2E8F0;overflow:hidden}
+.score-bar{height:6px;border-radius:9999px;background:#e4e4e7;overflow:hidden}
 .score-fill{height:100%;border-radius:9999px;transition:width .6s ease}
-.pill{border:1px solid #E2E8F0;padding:6px 12px;border-radius:9999px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
-.pill.active{background:#0F172A;color:#fff;border-color:#0F172A}
+.pill{border:1px solid #e4e4e7;padding:6px 12px;border-radius:9999px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.pill.active{background:#18181b;color:#fff;border-color:#18181b}
 .tag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:9999px;letter-spacing:.02em}
 .sortable{cursor:pointer;user-select:none}
-.sortable:hover{color:#0F172A}
-.card{border:1px solid #E2E8F0;background:#fff;border-radius:16px}
+.sortable:hover{color:#18181b}
+.card{border:1px solid #e4e4e7;background:#fff;border-radius:12px}
+.tnum,.font-mono{font-variant-numeric:tabular-nums}
 @media(max-width:768px){.hide-mobile{display:none}}
 </style>
 </head>
-<body class="bg-[#F8FAFC] text-ink font-sans">
+<body class="bg-[#fafafa] text-ink font-sans">
 <!-- Top Nav -->
 <header class="sticky top-0 z-30 bg-white/80 glass border-b border-line">
   <div class="max-w-[1280px] mx-auto px-4 md:px-6 h-[64px] flex items-center justify-between gap-4">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-white font-bold text-[16px]">◈</div>
+      <div class="w-9 h-9 rounded-lg bg-slate-900 flex items-center justify-center text-white font-bold text-[16px]">◈</div>
       <div>
-        <div class="font-bold leading-none text-[16px] flex items-center gap-2">ModelRank <span class="tag bg-amber-100 text-amber-700 border border-amber-200">BETA</span></div>
+        <div class="font-bold leading-none text-[16px] flex items-center gap-2">ModelRank <span class="tag bg-slate-100 text-slate-600 border border-slate-200">BETA</span></div>
         <div class="text-[12px] text-muted -mt-[2px]">GOAT vs Go · 便宜 × 高分 × 高额度 一眼找出</div>
       </div>
     </div>
@@ -70,8 +71,8 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
     <div class="col-span-12 lg:col-span-8 card p-5 md:p-6">
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 class="text-[22px] md:text-[26px] font-bold tracking-tight leading-tight">用<span class="bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent">性价比分</span>挑模型，<br class="hidden md:block">不只看价格，也不只看榜单。</h1>
-          <p class="text-[13px] text-muted mt-2 leading-relaxed">默认排序 = <b class="text-ink">Intelligence × 月额度 ÷ 预算</b>（单次成本=800 in+200 out+50k cache，缓存占比最高）。<b>月额度</b>=预算÷单次成本，额度越高越便宜，分数越高越强，<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span>NEW</span> 为7天内新上架。</p>
+          <h1 class="text-[22px] md:text-[26px] font-bold tracking-tight leading-tight">用<span class="text-blue-700">性价比分</span>挑模型，<br class="hidden md:block">不只看价格，也不只看榜单。</h1>
+          <p class="text-[13px] text-muted mt-2 leading-relaxed">默认排序 = <b class="text-ink">Intelligence × 月额度 ÷ 预算</b>（单次成本=800 in+200 out+50k cache，缓存占比最高）。<b>月额度</b>=预算÷单次成本，额度越高越便宜，分数越高越强，<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-600"></span>NEW</span> 为7天内新上架。</p>
         </div>
         <div class="flex gap-2 text-[11px]">
           <span class="tag bg-slate-900 text-white">7x GOAT $10→$70</span>
@@ -85,12 +86,12 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
     <div class="col-span-12 lg:col-span-4 card p-5">
       <div class="text-[13px] font-semibold flex items-center justify-between">如何算“值” <span class="text-[11px] font-normal text-muted">Score / Cost</span></div>
       <div class="mt-3 space-y-3 text-[13px] leading-relaxed">
-        <div class="flex gap-2"><span class="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-[12px]">1</span><span><b>先看性价比</b>：高分且便宜的在顶部</span></div>
+        <div class="flex gap-2"><span class="w-6 h-6 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center text-[12px]">1</span><span><b>先看性价比</b>：高分且便宜的在顶部</span></div>
         <div class="flex gap-2"><span class="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center text-[12px]">2</span><span><b>再看额度</b>：月可请求数 = 真实可用量</span></div>
-        <div class="flex gap-2"><span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-[12px]">3</span><span><b>新模型高亮</b>：7天内带 <span class="tag bg-amber-400 text-white">NEW</span> 脉冲</span></div>
+        <div class="flex gap-2"><span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-[12px]">3</span><span><b>新模型高亮</b>：7天内带 <span class="tag bg-blue-600 text-white">NEW</span> 脉冲</span></div>
       </div>
-      <div class="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-[12px] leading-relaxed">
-        <b class="text-amber-800">你的目标：</b>找 <span class="font-semibold">价格便宜 / 分数高 / 额度高</span> 的大模型 → 直接用默认排序，前3名就是答案。
+      <div class="mt-4 p-3 rounded-lg bg-blue-50/60 border border-blue-100 text-[12px] leading-relaxed">
+        <b class="text-blue-800">你的目标：</b>找 <span class="font-semibold">价格便宜 / 分数高 / 额度高</span> 的大模型 → 直接用默认排序，前3名就是答案。
       </div>
       <div class="mt-3 flex items-center gap-2 text-[12px] text-muted"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> 每天自动刷新一次，手动每天最多5次</div>
     </div>
@@ -101,19 +102,19 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
     <div class="flex flex-col md:flex-row gap-3 md:items-center justify-between">
       <div class="flex items-center gap-2 flex-wrap">
         <button data-source="" class="pill">全部</button>
-        <button data-source="commandcode" class="pill">⚡ Command Code GOAT <span id="c-cc" class="ml-1 text-muted">—</span></button>
-        <button data-source="opencode" class="pill active">◆ OpenCode Go <span id="c-op" class="ml-1 text-muted">—</span></button>
-        <button id="btnNew" class="pill">✦ 只看 NEW <span id="c-new" class="ml-1">—</span></button>
+        <button data-source="commandcode" class="pill">Command Code GOAT <span id="c-cc" class="ml-1 text-muted">—</span></button>
+        <button data-source="opencode" class="pill active">OpenCode Go <span id="c-op" class="ml-1 text-muted">—</span></button>
+        <button id="btnNew" class="pill">只看 NEW <span id="c-new" class="ml-1">—</span></button>
       </div>
       <div class="flex items-center gap-2">
         <div class="relative flex-1 md:w-[280px]">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted">⌕</span>
-          <input id="q" placeholder="搜索模型，如 Muse Spark / DeepSeek" class="w-full pl-8 pr-3 py-2 rounded-full border border-line bg-[#F8FAFC] text-[13px] outline-none focus:border-amber-400 focus:bg-white">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-muted" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+          <input id="q" placeholder="搜索模型，如 Muse Spark / DeepSeek" class="w-full pl-8 pr-3 py-2 rounded-full border border-line bg-[#fafafa] text-[13px] outline-none focus:border-blue-500 focus:bg-white">
         </div>
       </div>
     </div>
     <div class="flex items-center gap-2 text-[12px] text-muted flex-wrap">
-      <span>点击表头排序 · <b>Shift+点击</b>加第二条件</span><span id="sortHint" class="text-sky-700 font-medium"></span>
+      <span>点击表头排序 · <b>Shift+点击</b>加第二条件</span><span id="sortHint" class="text-blue-700 font-medium"></span>
       <span class="ml-auto hidden md:inline">共 <b id="total" class="text-ink">—</b> 个模型 · 已筛选 <b id="filtered" class="text-ink">—</b></span>
     </div>
   </div>
@@ -122,7 +123,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
   <div class="card mt-4 overflow-hidden">
     <div class="overflow-x-auto">
       <table class="w-full text-[13px]">
-        <thead class="bg-[#F8FAFC] border-b border-line text-[11px] tracking-wide text-muted font-semibold">
+        <thead class="bg-[#fafafa] border-b border-line text-[11px] tracking-wide text-muted font-semibold">
           <tr>
             <th class="text-left px-4 py-3 w-[48px]">#</th>
             <th class="text-left px-3 py-3 min-w-[220px]">模型</th>
@@ -131,7 +132,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
             <th class="px-3 py-3 text-left hide-mobile">上下文</th>
             <th class="sortable px-3 py-3 text-left" data-sort="output">输出价 <span class="text-[10px]">↕</span></th>
             <th class="sortable px-3 py-3 text-left" data-sort="cache">缓存 <span class="text-[10px]">↕</span></th>
-            <th class="sortable px-3 py-3 text-left bg-amber-50" data-sort="req_month">额度 <span class="text-[10px]">↕</span> <span class="text-[10px] text-amber-700 font-bold">★</span></th>
+            <th class="sortable px-3 py-3 text-left bg-blue-50/60" data-sort="req_month">额度 <span class="text-[10px]">↕</span> <span class="text-[10px] text-blue-700 font-bold">★</span></th>
             <th class="sortable px-3 py-3 text-left" data-sort="value">性价比 <span class="text-[10px]">↕</span></th>
           </tr>
         </thead>
@@ -140,7 +141,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
         </tbody>
       </table>
     </div>
-    <div class="px-4 py-3 bg-[#F8FAFC] border-t border-line flex items-center justify-between text-[12px] text-muted">
+    <div class="px-4 py-3 bg-[#fafafa] border-t border-line flex items-center justify-between text-[12px] text-muted">
       <span>数据来自官方文档与 /v1/models，每日自动更新</span>
       <span class="hidden md:inline">Tip: 点表头可切换排序 · 移动端可横滑</span>
     </div>
@@ -184,31 +185,31 @@ function render(meta){
   const topM = data.find(x=> (x.intelligence||0)===topInt);
   const cheap = data.length ? data.reduce((a,b)=> (a.req_month||0)>(b.req_month||0)?a:b, data[0]) : null;
   $('#stats').innerHTML = `
-    <div class="rounded-xl border border-line p-3 bg-white"><div class="text-[11px] text-muted">总模型数</div><div class="text-[22px] font-bold">${meta.total}</div><div class="text-[12px] text-muted">GOAT ${meta.commandcode} · Go ${meta.opencode}</div></div>
-    <div class="rounded-xl border border-line p-3 bg-white"><div class="text-[11px] text-muted">平均 Intelligence</div><div class="text-[22px] font-bold">${avg.toFixed(1)}</div><div class="text-[12px] text-muted">有分模型均值</div></div>
-    <div class="rounded-xl border border-line p-3 bg-white"><div class="text-[11px] text-muted">最高分</div><div class="text-[18px] font-bold truncate">${topM?topM.display_name:'—'} <span class="text-amber-600">${topInt||'—'}</span></div><div class="text-[12px] text-muted">分数优先首选</div></div>
-    <div class="rounded-xl border border-line p-3 bg-gradient-to-br from-amber-500 to-orange-600 text-white"><div class="text-[11px] text-white/80">最多额度</div><div class="text-[18px] font-bold truncate">${cheap?cheap.display_name:'—'}</div><div class="text-[12px] text-white/80">${cheap?fmt(cheap.req_month)+'/月':''} · 最便宜</div></div>
+    <div class="rounded-lg border border-line p-3 bg-white"><div class="text-[11px] text-muted">总模型数</div><div class="text-[22px] font-bold">${meta.total}</div><div class="text-[12px] text-muted">GOAT ${meta.commandcode} · Go ${meta.opencode}</div></div>
+    <div class="rounded-lg border border-line p-3 bg-white"><div class="text-[11px] text-muted">平均 Intelligence</div><div class="text-[22px] font-bold">${avg.toFixed(1)}</div><div class="text-[12px] text-muted">有分模型均值</div></div>
+    <div class="rounded-lg border border-line p-3 bg-white"><div class="text-[11px] text-muted">最高分</div><div class="text-[18px] font-bold truncate">${topM?topM.display_name:'—'} <span class="text-blue-700">${topInt||'—'}</span></div><div class="text-[12px] text-muted">分数优先首选</div></div>
+    <div class="rounded-lg border border-slate-900 p-3 bg-slate-900 text-white"><div class="text-[11px] text-white/80">最多额度</div><div class="text-[18px] font-bold truncate">${cheap?cheap.display_name:'—'}</div><div class="text-[12px] text-white/80">${cheap?fmt(cheap.req_month)+'/月':''} · 最便宜</div></div>
   `;
 
   if(!data.length){ tbody.innerHTML='<tr><td colspan=9 class="px-6 py-12 text-center text-muted">无匹配结果</td></tr>'; return; }
   tbody.innerHTML = data.map((r,i)=>{
     const isNew = (Date.now()/1000 - r.first_seen_at) < 7*86400;
     const rank = i+1;
-    const medal = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
+    const medal = '';
     const intel = r.intelligence;
     const intelStr = intel===null ? '<span class="text-muted text-[12px]">待评分</span>' : `<span class="font-mono font-semibold">${Number(intel).toFixed(1)}</span>`;
     const pct = intel===null?0:Math.min(100, (intel/56)*100);
-    const platform = r.source==='opencode' ? '<span class="tag bg-slate-900 text-white">Go</span>' : '<span class="tag bg-amber-500 text-white">GOAT</span>';
-    const cacheClass = r.cache_read_price===null ? 'text-muted' : (r.cache_read_price<=0.02 ? 'text-emerald-600 font-semibold' : (r.cache_read_price>=0.1 ? 'text-red-600' : 'text-amber-600'));
+    const platform = r.source==='opencode' ? '<span class="tag bg-slate-900 text-white">Go</span>' : '<span class="tag bg-white text-slate-700 border border-line">GOAT</span>';
+    const cacheClass = r.cache_read_price===null ? 'text-muted' : (r.cache_read_price<=0.02 ? 'text-emerald-600 font-semibold' : (r.cache_read_price>=0.1 ? 'text-red-600' : 'text-blue-600'));
     const value = Number(r.value_score||0);
     const valueLabel = value>900 ? '极高' : value>400 ? '高' : value>150 ? '中' : '低';
-    const valueColor = value>900?'bg-emerald-500':value>400?'bg-amber-500':value>150?'bg-slate-700':'bg-slate-300';
-    return `<tr class="hover:bg-amber-50/40 ${isNew?'bg-amber-50/30':''}">
-      <td class="px-4 py-3 font-mono text-[12px]">${medal} ${rank}</td>
+    const valueColor = value>900?'bg-emerald-600':value>400?'bg-blue-600':value>150?'bg-slate-500':'bg-slate-300';
+    return `<tr class="hover:bg-slate-50 ${isNew?'bg-blue-50/40':''}">
+      <td class="px-4 py-3 font-mono text-[12px]">${rank}</td>
       <td class="px-3 py-3">
         <div class="flex items-center gap-2">
           <div class="font-semibold leading-tight truncate max-w-[160px] md:max-w-[200px]">${r.display_name}</div>
-          ${isNew?'<span class="tag bg-amber-400 text-white animate-pulse">NEW '+r.days_old+'d</span>':''}
+          ${isNew?'<span class="tag bg-blue-600 text-white">NEW '+r.days_old+'d</span>':''}
           ${r.is_free?'<span class="tag bg-emerald-500 text-white">FREE</span>':''}
         </div>
         <div class="text-[11px] text-muted font-mono truncate">${r.model_id}</div>
@@ -216,12 +217,12 @@ function render(meta){
       <td class="px-3 py-3">${platform}</td>
       <td class="px-3 py-3 min-w-[140px]">
         <div class="flex items-center gap-2">${intelStr}</div>
-        <div class="score-bar mt-1 w-[110px]"><div class="score-fill ${intel===null?'bg-slate-200': intel>48?'bg-emerald-500': intel>40?'bg-amber-500':'bg-slate-700'}" style="width:${pct}%"></div></div>
+        <div class="score-bar mt-1 w-[110px]"><div class="score-fill ${intel===null?'bg-slate-200': intel>48?'bg-emerald-600': intel>40?'bg-blue-600':'bg-slate-400'}" style="width:${pct}%"></div></div>
       </td>
       <td class="px-3 py-3 hide-mobile font-mono text-[12px]">${r.context||'1M'}</td>
       <td class="px-3 py-3 font-mono text-[13px] font-semibold">${price(r.output_price)}</td>
       <td class="px-3 py-3 font-mono text-[13px]"><span class="${cacheClass}">${price(r.cache_read_price)}</span></td>
-      <td class="px-3 py-3 bg-amber-50/50 border-l border-amber-200">${r.is_free ? `<div class="font-mono font-bold text-[14px] text-emerald-600">FREE∞</div><div class="text-[11px] font-mono text-muted">不限量 · 分数${r.intelligence??'待评'}</div>` : `<div class="font-mono font-bold text-[14px] text-amber-700" title="精确 ${(r.req_month||0).toLocaleString()}/月">${((r.req_month||0)>=10000 ? ((r.req_month/1000).toFixed(1)+'k') : (r.req_month||0).toLocaleString())}/月</div><div class="text-[11px] font-mono text-muted">$${r.budget|| (r.source==='opencode'?60:20)}预算 · ${fmt(r.req_5h||0)}/5h</div>`}</td>
+      <td class="px-3 py-3 bg-blue-50/40 border-l border-blue-100">${r.is_free ? `<div class="font-mono font-bold text-[14px] text-emerald-600">FREE∞</div><div class="text-[11px] font-mono text-muted">不限量 · 分数${r.intelligence??'待评'}</div>` : `<div class="font-mono font-bold text-[14px] text-blue-700" title="精确 ${(r.req_month||0).toLocaleString()}/月">${((r.req_month||0)>=10000 ? ((r.req_month/1000).toFixed(1)+'k') : (r.req_month||0).toLocaleString())}/月</div><div class="text-[11px] font-mono text-muted">$${r.budget|| (r.source==='opencode'?60:20)}预算 · ${fmt(r.req_5h||0)}/5h</div>`}</td>
       <td class="px-3 py-3"><span class="inline-flex items-center gap-2"><span class="w-2 h-2 rounded-full ${valueColor}"></span><span class="font-semibold">${valueLabel}</span></span><div class="text-[11px] text-muted font-mono">${value.toFixed(0)}</div></td>
     </tr>`;
   }).join('');
@@ -254,7 +255,7 @@ function updateSortBadges(){
     else{
       const arrow = filters.sorts[idx].dir==='desc' ? '↓' : '↑';
       badge.textContent = (filters.sorts.length>1 ? (idx+1)+'\uFE0F\u20E3'+arrow : arrow);
-      badge.className='sort-badge text-[10px] ml-1 font-bold '+(idx===0?'text-amber-600':'text-sky-600');
+      badge.className='sort-badge text-[10px] ml-1 font-bold '+(idx===0?'text-blue-700':'text-slate-500');
     }
   });
   const hint = filters.sorts.map((s,i)=>(i+1)+'.'+s.col+s.dir).join(' ');
