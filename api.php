@@ -65,7 +65,7 @@ if ($action === 'list_models') {
         END as cost_per_req,
         CASE
           WHEN (input_price=0 AND output_price=0) THEN COALESCE(intelligence,25)*1000
-          WHEN budget>0 AND req_month>0 THEN MAX(COALESCE(intelligence,0)-30,0) * req_month *1.0 / budget
+          WHEN budget>0 AND req_month>0 THEN MAX(COALESCE(intelligence,0)-30,0) * req_month
           WHEN input_price IS NULL THEN 0
           ELSE MAX(COALESCE(intelligence,0)-30,0) / ((input_price*800 + output_price*200 + COALESCE(cache_read_price,0)*50000)/1000000 + 0.0001)
         END as value_score

@@ -75,7 +75,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 class="text-[22px] md:text-[26px] font-bold tracking-tight leading-tight">用<span class="text-blue-700">性价比分</span>挑模型，<br class="hidden md:block">不只看价格，也不只看榜单。</h1>
-          <p class="text-[13px] text-muted mt-2 leading-relaxed">默认排序 = <b class="text-ink">Intelligence × 月额度 ÷ 预算</b>（<b>月额度</b>=官方 Estimated requests 按典型Go用量估算，各模型单次token不同）。额度越高越便宜，分数越高越强，<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-600"></span>NEW</span> 为7天内新上架。</p>
+          <p class="text-[13px] text-muted mt-2 leading-relaxed">默认排序 = <b class="text-ink">总回报 (Intelligence−30) × 月额度</b>（<b>月额度</b>=官方 Estimated requests，订阅费固定，额度给得越多越值）。分高量大排前面，<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-600"></span>NEW</span> 为7天内新上架。</p>
         </div>
         <div class="flex gap-2 text-[11px]">
           <span class="tag bg-slate-900 text-white">7x GOAT $10→$70</span>
@@ -205,8 +205,8 @@ function render(meta){
     const platform = r.source==='opencode' ? '<span class="tag bg-slate-900 text-white">Go</span>' : '<span class="tag bg-white text-slate-700 border border-line">GOAT</span>';
     const cacheClass = r.cache_read_price===null ? 'text-muted' : (r.cache_read_price<=0.02 ? 'text-emerald-600 font-semibold' : (r.cache_read_price>=0.1 ? 'text-red-600' : 'text-blue-600'));
     const value = Number(r.value_score||0);
-    const valueLabel = value>900 ? '极高' : value>400 ? '高' : value>150 ? '中' : '低';
-    const valueColor = value>900?'bg-emerald-600':value>400?'bg-blue-600':value>150?'bg-slate-500':'bg-slate-300';
+    const valueLabel = value>200000 ? '极高' : value>50000 ? '高' : value>10000 ? '中' : '低';
+    const valueColor = value>200000?'bg-emerald-600':value>50000?'bg-blue-600':value>10000?'bg-slate-500':'bg-slate-300';
     return `<tr class="hover:bg-slate-50 ${isNew?'bg-blue-50/40':''}">
       <td class="px-4 py-3 font-mono text-[12px]">${rank}</td>
       <td class="px-3 py-3">
