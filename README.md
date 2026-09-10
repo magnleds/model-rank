@@ -4,7 +4,7 @@
 
 - **得分统一用 Command Code Intelligence**（灵魂），Opencode 同名模型自动映射补分
 - **性价比排序** = 总回报 (Intelligence-30) × 月额度，默认置顶“分高且量大”
-- **额度** = 月可请求数（Go官方Estimated requests / GOAT按credits反推）
+- **额度** = 月可请求数（Go官方Estimated requests / GOAT官方估算表）
 - **NEW 高亮** = 首次收录 7 天内脉冲徽章
 - **刷新** = 每天 03:00 自动一次 + 手动 5 次/天/IP 限流
 - **UI** = Tailwind CDN 现代排行榜（shadcn 风格），无登录直达，移动端横滑

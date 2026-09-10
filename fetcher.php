@@ -103,7 +103,7 @@ function goat_budget(string $mid): int {
     if ($map===null){
         $raw = [
             'gpt-5-6-sol'=>70,'glm-5-2'=>70,'tencent-hy3'=>70,'qwen-3-8-27b'=>70,'qwen3-8-27b'=>70,
-            'deepseek-v4-flash'=>60,'kimi-k2-7-code'=>60,'kimi-k2.7-code'=>60,
+            'deepseek-v4-flash'=>60,'deepseek-v4-1-flash'=>60,'kimi-k2-7-code'=>60,'kimi-k2.7-code'=>60,
             'minimax-m3'=>47,
             'glm-5-3-flash'=>40,'gemini-3-8-flash'=>40,'gemini-3-7-flash'=>40,
             'qwen-3-7-max'=>33,'qwen3-7-max'=>33,'qwen-3-7-plus'=>33,'qwen3-7-plus'=>33,'qwen-3-6-plus'=>33,'qwen3-6-plus'=>33,
@@ -119,6 +119,59 @@ function goat_budget(string $mid): int {
     $base = end($parts);
     if (isset($map[$base])) return $map[$base];
     return 20;
+}
+// Official Estimated requests from https://commandcode.ai/docs/plans/goat#usage-limits
+// [req_5h, req_week, req_month].以此为准,不再用固定800/200/50k反推(各系列单次output不同+解析价易错,MiMo曾差97倍).
+function goat_estimated(): array {
+    static $cache = null;
+    if ($cache !== null) return $cache;
+    $raw = [
+        'gpt-5-6-sol'=>[414,1040,2070],
+        'deepseek-v4-flash'=>[30800,76900,154000],
+        'deepseek-v4-1-flash'=>[30800,76900,154000],
+        'glm-5-2'=>[947,2370,4740],
+        'gpt-5-6-luna'=>[2960,7400,14800],
+        'tencent-hy3'=>[7080,17700,35400],
+        'qwen3-8-27b'=>[4790,12000,24000],
+        'qwen3-8-max'=>[261,654,1310],
+        'qwen3-8-max-0902'=>[261,654,1310],
+        'qwen3-7-max'=>[232,579,1160],
+        'qwen3-7-plus'=>[1420,3560,7110],
+        'qwen3-6-plus'=>[1100,2750,5500],
+        'minimax-m3'=>[2770,6930,13900],
+        'kimi-k2-7-code'=>[1080,2710,5420],
+        'glm-5-3-flash'=>[4720,11800,23600],
+        'gemini-3-8-flash'=>[784,1960,3920],
+        'gemini-3-7-flash'=>[784,1960,3920],
+        'mimo-v2-5'=>[19500,48700,97400],
+        'deepseek-v4-pro'=>[1980,4940,9880],
+        'mimo-v2-5-pro'=>[5700,14200,28500],
+        'hy4-preview'=>[1220,3060,6120],
+        'qwen3-8-flash'=>[3910,9780,19600],
+        'deepseek-v4-flash-vision-exp'=>[6080,15200,30400],
+        'deepseek-v4-flash-fast'=>[1040,2610,5210],
+        'glm-5-3'=>[271,677,1350],
+        'muse-spark-1-3'=>[428,1070,2140],
+        'muse-spark-1-3-contributor'=>[18200,45500,90900],
+        'muse-spark-1-2'=>[428,1070,2140],
+        'muse-spark-1-2-contributor'=>[18200,45500,90900],
+        'kimi-k3'=>[196,490,980],
+        'kimi-k2-7-code-highspeed'=>[181,452,904],
+        'grok-4-5'=>[144,360,719],
+        'grok-4-6'=>[144,360,719],
+        'glm-5-2-fast'=>[138,346,691],
+        'inkling'=>[396,989,1980],
+        'inkling-small'=>[709,1770,3550],
+        'step-3-7-flash'=>[1670,4180,8370],
+        'step-3-5-flash'=>[3510,8770,17500],
+        'nemotron-3-ultra'=>[575,1440,2870],
+        // 别名:live slug带参数后缀
+        'nemotron-3-ultra-550b-a55b'=>[575,1440,2870],
+    ];
+    $out=[];
+    foreach($raw as $k=>$v){ $out[normalize_id($k)]=$v; }
+    $cache = $out;
+    return $out;
 }
 function parse_opencode(): array {
     $pricing = opencode_pricing();
@@ -241,12 +294,20 @@ function parse_commandcode(): array {
                 } elseif ($inp===0.0 && $outp===0.0) {
                     $out_item['req_month']=999999; $out_item['req_5h']=199999; $out_item['req_week']=499999;
                 } else {
-                    $cost = ($inp*800 + $outp*200 + ($cache??0)*50000)/1000000;
-                    if ($cost <= 0) $cost = 0.0001;
-                    $req_month = (int)($budget / $cost);
-                    $out_item['req_month']=$req_month;
-                    $out_item['req_5h']=(int)($req_month*14/70);
-                    $out_item['req_week']=(int)($req_month*35/70);
+                    // 额度优先用官方估算表;无官方数的才按credits÷成本估算
+                    $gest = goat_estimated();
+                    $gnorm = normalize_id($mid);
+                    if (isset($gest[$gnorm])) {
+                        [$h5, $wk, $mo] = $gest[$gnorm];
+                        $out_item['req_5h']=$h5; $out_item['req_week']=$wk; $out_item['req_month']=$mo;
+                    } else {
+                        $cost = ($inp*800 + $outp*200 + ($cache??0)*50000)/1000000;
+                        if ($cost <= 0) $cost = 0.0001;
+                        $req_month = (int)($budget / $cost);
+                        $out_item['req_month']=$req_month;
+                        $out_item['req_5h']=(int)($req_month*14/70);
+                        $out_item['req_week']=(int)($req_month*35/70);
+                    }
                 }
                 $out[]=$out_item;
             }
