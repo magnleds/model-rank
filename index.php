@@ -75,7 +75,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 class="text-[22px] md:text-[26px] font-bold tracking-tight leading-tight">用<span class="text-blue-700">性价比分</span>挑模型，<br class="hidden md:block">不只看价格，也不只看榜单。</h1>
-          <p class="text-[13px] text-muted mt-2 leading-relaxed">默认排序 = <b class="text-ink">Intelligence × 月额度 ÷ 预算</b>（单次成本=800 in+200 out+50k cache，缓存占比最高）。<b>月额度</b>=预算÷单次成本，额度越高越便宜，分数越高越强，<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-600"></span>NEW</span> 为7天内新上架。</p>
+          <p class="text-[13px] text-muted mt-2 leading-relaxed">默认排序 = <b class="text-ink">Intelligence × 月额度 ÷ 预算</b>（<b>月额度</b>=官方 Estimated requests 按典型Go用量估算，各模型单次token不同）。额度越高越便宜，分数越高越强，<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-600"></span>NEW</span> 为7天内新上架。</p>
         </div>
         <div class="flex gap-2 text-[11px]">
           <span class="tag bg-slate-900 text-white">7x GOAT $10→$70</span>
@@ -145,7 +145,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
       </table>
     </div>
     <div class="px-4 py-3 bg-[#fafafa] border-t border-line flex items-center justify-between text-[12px] text-muted">
-      <span>数据来自官方文档与 /v1/models，每日自动更新</span>
+      <span>Go额度=官方Estimated requests · 单价=官方Usage limits · 每日自动更新</span>
       <span class="hidden md:inline">Tip: 点表头可切换排序 · 移动端可横滑</span>
     </div>
   </div>

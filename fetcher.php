@@ -19,13 +19,13 @@ function http_get(string $url, int $timeout=12): ?string {
 function normalize_id(string $id): string {
     return strtolower(str_replace(['.', '_'], '-', $id));
 }
-// Official Go pricing from https://raw.githubusercontent.com/sst/opencode/dev/packages/web/src/content/docs/go.mdx
-// Usage = per-model monthly budget ($15/$30/$60/$100). Off-Peak + <=context tier.
+// Official Go pricing from https://opencode.ai/docs/go (Usage limits table)
+// Monthly budget per model ($15/$30/$60). DeepSeek = Off-Peak, Qwen Plus/Grok/Luna = <=tier.
 function opencode_pricing(): array {
     $raw = [
         'grok-4-6'=>['in'=>2.00,'out'=>6.00,'cache'=>0.50,'cachew'=>null,'budget'=>15],
         'gpt-5-6-luna'=>['in'=>0.20,'out'=>1.20,'cache'=>0.02,'cachew'=>0.25,'budget'=>15],
-        'glm-5-3-flash'=>['in'=>0.15,'out'=>0.50,'cache'=>0.03,'cachew'=>null,'budget'=>15],
+        'glm-5-3-flash'=>['in'=>0.15,'out'=>0.50,'cache'=>0.03,'cachew'=>null,'budget'=>60],
         'glm-5-3'=>['in'=>1.40,'out'=>4.40,'cache'=>0.26,'cachew'=>null,'budget'=>15],
         'glm-5-2'=>['in'=>1.40,'out'=>4.40,'cache'=>0.26,'cachew'=>null,'budget'=>60],
         'glm-5-1'=>['in'=>1.40,'out'=>4.40,'cache'=>0.26,'cachew'=>null,'budget'=>60],
@@ -37,6 +37,7 @@ function opencode_pricing(): array {
         'mimo-v2-5-pro'=>['in'=>0.435,'out'=>0.87,'cache'=>0.003625,'cachew'=>null,'budget'=>15],
         'minimax-m3'=>['in'=>0.30,'out'=>1.20,'cache'=>0.06,'cachew'=>null,'budget'=>60],
         'minimax-m2-7'=>['in'=>0.30,'out'=>1.20,'cache'=>0.06,'cachew'=>0.375,'budget'=>60],
+        'minimax-m2-5'=>['in'=>0.30,'out'=>1.20,'cache'=>0.06,'cachew'=>0.375,'budget'=>60],
         'muse-spark-1-3-contributor'=>['in'=>0.10,'out'=>0.20,'cache'=>0.002,'cachew'=>null,'budget'=>60],
         'muse-spark-1-2-contributor'=>['in'=>0.10,'out'=>0.20,'cache'=>0.002,'cachew'=>null,'budget'=>60],
         'qwen3-8-max'=>['in'=>2.00,'out'=>6.00,'cache'=>0.25,'cachew'=>2.50,'budget'=>15],
@@ -45,13 +46,53 @@ function opencode_pricing(): array {
         'qwen3-7-plus'=>['in'=>0.40,'out'=>1.60,'cache'=>0.04,'cachew'=>0.50,'budget'=>60],
         'qwen3-6-plus'=>['in'=>0.50,'out'=>3.00,'cache'=>0.05,'cachew'=>0.625,'budget'=>60],
         'deepseek-v4-pro'=>['in'=>0.66,'out'=>1.98,'cache'=>0.022,'cachew'=>null,'budget'=>15],
-        'deepseek-v4-flash'=>['in'=>0.22,'out'=>0.66,'cache'=>0.007,'cachew'=>null,'budget'=>30],
-        'deepseek-v4-flash-vision-exp'=>['in'=>0.22,'out'=>0.66,'cache'=>0.007,'cachew'=>null,'budget'=>15],
+        'deepseek-v4-flash'=>['in'=>0.15,'out'=>0.60,'cache'=>0.003,'cachew'=>null,'budget'=>30],
+        'deepseek-flash'=>['in'=>0.15,'out'=>0.60,'cache'=>0.003,'cachew'=>null,'budget'=>15], // live短ID,即文档DeepSeek V4.1 Flash($15)
+        'deepseek-v4-flash-vision-exp'=>['in'=>0.15,'out'=>0.60,'cache'=>0.003,'cachew'=>null,'budget'=>15],
         'hy4-preview'=>['in'=>0.834,'out'=>2.501,'cache'=>0.042,'cachew'=>null,'budget'=>30],
         'hy3'=>['in'=>0.14,'out'=>0.58,'cache'=>0.035,'cachew'=>null,'budget'=>60],
+        // legacy:不在官方文档但live API仍返回,保留以免变待定价0
         'omen-alpha'=>['in'=>0.20,'out'=>0.66,'cache'=>0.04,'cachew'=>null,'budget'=>100],
     ];
     // normalize keys to dash form
+    $out=[];
+    foreach($raw as $k=>$v){ $out[normalize_id($k)]=$v; }
+    return $out;
+}
+// Official Estimated requests from https://opencode.ai/docs/go#estimated-requests
+// [req_5h, req_week, req_month].以此为准,不再用固定800/200/50k反推(各模型真实用量不同,反推偏差可达3倍).
+function opencode_estimated(): array {
+    $raw = [
+        'glm-5-3-flash'=>[6320,15790,31580],
+        'glm-5-3'=>[220,540,1080],
+        'glm-5-2'=>[880,2150,4300],
+        'glm-5-1'=>[880,2150,4300],
+        'kimi-k3'=>[110,250,490],
+        'kimi-k2-7-code'=>[1350,3380,6750],
+        'kimi-k2-6'=>[1150,2880,5750],
+        'longcat-2-0'=>[11400,28600,57200],
+        'mimo-v2-5'=>[30100,75200,150400],
+        'mimo-v2-5-pro'=>[3250,8150,16300],
+        'minimax-m3'=>[3200,8000,16000],
+        'minimax-m2-7'=>[3400,8500,17000],
+        'muse-spark-1-3-contributor'=>[45300,113300,226600],
+        'muse-spark-1-2-contributor'=>[45300,113300,226600],
+        'qwen3-8-max'=>[160,400,810],
+        'qwen3-8-flash'=>[5400,13500,27000],
+        'qwen3-7-max'=>[170,420,840],
+        'qwen3-7-plus'=>[4300,10800,21600],
+        'qwen3-6-plus'=>[3300,8200,16300],
+        'deepseek-v4-1-flash'=>[6500,16250,32500],
+        'deepseek-v4-pro'=>[1050,2600,5200],
+        'deepseek-v4-flash'=>[13000,32500,65000],
+        'deepseek-v4-flash-vision-exp'=>[6500,16250,32500],
+        'hy4-preview'=>[1350,3380,6770],
+        'hy3'=>[4300,10750,21500],
+        'grok-4-6'=>[169,423,845],
+        'gpt-5-6-luna'=>[2050,5100,10250],
+        // 别名:live API里的deepseek-flash(无版本号)按V4.1 Flash计
+        'deepseek-flash'=>[6500,16250,32500],
+    ];
     $out=[];
     foreach($raw as $k=>$v){ $out[normalize_id($k)]=$v; }
     return $out;
@@ -89,13 +130,14 @@ function parse_opencode(): array {
             foreach ($data['data'] as $m) if (!empty($m['id'])) $ids[] = normalize_id($m['id']);
         }
     }
-    // Canonical: pricing table (go.mdx) + any new ids from /v1/models (fallback,待定价)
+    // Canonical: pricing table (docs/go) + any new ids from /v1/models (fallback,待定价)
     $liveIds = $ids;
     $ids = array_keys($pricing);
     // append unknown live ids as fallback entries (new models,待定价)
     foreach($liveIds as $lid){
         if (!isset($pricing[$lid]) && !in_array($lid, $ids)) $ids[] = $lid;
     }
+    $est = opencode_estimated();
     $out=[];
     foreach(array_unique($ids) as $id){
         $norm = normalize_id($id);
@@ -113,16 +155,23 @@ function parse_opencode(): array {
             ];
             continue;
         }
-        $cost = ($pr['in']*800 + $pr['out']*200 + $pr['cache']*50000)/1000000;
-        if ($cost<=0) $cost=0.0001;
-        $req_month = (int)($pr['budget'] / $cost);
+        // 额度优先用官方Estimated requests;无官方数的才按预算÷成本估算
+        if (isset($est[$norm])) {
+            [$req_5h, $req_week, $req_month] = $est[$norm];
+        } else {
+            $cost = ($pr['in']*800 + $pr['out']*200 + $pr['cache']*50000)/1000000;
+            if ($cost<=0) $cost=0.0001;
+            $req_month = (int)($pr['budget'] / $cost);
+            $req_5h = (int)($req_month*12/60);
+            $req_week = (int)($req_month*30/60);
+        }
         $out[]=[
             'source'=>'opencode',
             'model_id'=>$norm,
             'display_name'=>ucwords(str_replace(['-','.'],' ', $norm)),
             'context'=>'1M',
-            'req_5h'=>(int)($req_month*12/60),
-            'req_week'=>(int)($req_month*30/60),
+            'req_5h'=>$req_5h,
+            'req_week'=>$req_week,
             'req_month'=>$req_month,
             'budget'=>$pr['budget'],
             'input_price'=>$pr['in'],
@@ -211,7 +260,7 @@ function parse_commandcode(): array {
             ['id'=>'muse-spark-1-3-contributor','name'=>'Muse Spark 1.3 Contributor','int'=>53.0,'tps'=>221,'in'=>0.10,'out'=>0.20,'cache'=>0.002,'ctx'=>'1M'],
             ['id'=>'glm-5-3-flash','name'=>'GLM-5.3 Flash','int'=>46.2,'tps'=>59,'in'=>0.15,'out'=>0.50,'cache'=>0.03,'ctx'=>'1M'],
             ['id'=>'longcat-2-0-free','name'=>'LongCat 2.0','int'=>25.8,'tps'=>49,'in'=>0,'out'=>0,'cache'=>0,'ctx'=>'1M','free'=>1],
-            ['id'=>'deepseek-v4-flash-vision-exp','name'=>'DeepSeek V4 Flash Vision (exp)','int'=>40.7,'tps'=>120,'in'=>0.22,'out'=>0.66,'cache'=>0.007,'ctx'=>'1M'],
+            ['id'=>'deepseek-v4-flash-vision-exp','name'=>'DeepSeek V4 Flash Vision (exp)','int'=>40.7,'tps'=>120,'in'=>0.15,'out'=>0.60,'cache'=>0.003,'ctx'=>'1M'],
             ['id'=>'glm-5-3','name'=>'GLM-5.3','int'=>48.6,'tps'=>75,'in'=>1.40,'out'=>4.40,'cache'=>0.26,'ctx'=>'1M'],
             ['id'=>'deepseek-v4-pro','name'=>'DeepSeek V4 Pro (latest)','int'=>42.1,'tps'=>62,'in'=>0.66,'out'=>1.98,'cache'=>0.022,'ctx'=>'1M'],
             ['id'=>'grok-4-6','name'=>'Grok 4.6','int'=>50.6,'tps'=>57,'in'=>2.0,'out'=>6.0,'cache'=>0.50,'ctx'=>'500K'],
