@@ -48,6 +48,7 @@ function opencode_pricing(): array {
         'deepseek-v4-pro'=>['in'=>0.66,'out'=>1.98,'cache'=>0.022,'cachew'=>null,'budget'=>15],
         'deepseek-v4-flash'=>['in'=>0.15,'out'=>0.60,'cache'=>0.003,'cachew'=>null,'budget'=>30],
         'deepseek-flash'=>['in'=>0.15,'out'=>0.60,'cache'=>0.003,'cachew'=>null,'budget'=>15], // live短ID,即文档DeepSeek V4.1 Flash($15)
+        'deepseek-v4-1-flash'=>['in'=>0.15,'out'=>0.60,'cache'=>0.003,'cachew'=>null,'budget'=>15], // 文档Endpoints表ID deepseek-v4.1-flash,即V4.1 Flash Off-Peak($15)
         'deepseek-v4-flash-vision-exp'=>['in'=>0.15,'out'=>0.60,'cache'=>0.003,'cachew'=>null,'budget'=>15],
         'hy4-preview'=>['in'=>0.834,'out'=>2.501,'cache'=>0.042,'cachew'=>null,'budget'=>30],
         'hy3'=>['in'=>0.14,'out'=>0.58,'cache'=>0.035,'cachew'=>null,'budget'=>60],
