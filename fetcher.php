@@ -19,80 +19,79 @@ function http_get(string $url, int $timeout=12): ?string {
 function normalize_id(string $id): string {
     return strtolower(str_replace(['.', '_'], '-', $id));
 }
-// Official Go pricing from https://opencode.ai/docs/go (Usage limits table)
-// Monthly budget per model ($15/$30/$60). DeepSeek = Off-Peak, Qwen Plus/Grok/Luna = <=tier.
+// Official Go pricing from https://opencode.ai/docs/go (Usage limits table, Go plan)
+// Synced 2026-11-06. Tiers now $15/$20/$30/$60/$100. DeepSeek V4.1 Flash = Off-Peak $100.
+// Qwen Plus/Grok/Luna/Claude/Gemini = <=tier. Kimi K3 has Cached Write $3.00.
 function opencode_pricing(): array {
     $raw = [
-        'grok-4-6'=>['in'=>2.00,'out'=>6.00,'cache'=>0.50,'cachew'=>null,'budget'=>15],
+        'grok-4-7'=>['in'=>2.00,'out'=>6.00,'cache'=>0.50,'cachew'=>null,'budget'=>15],
+        'gpt-6-luna'=>['in'=>0.10,'out'=>0.50,'cache'=>0.01,'cachew'=>0.125,'budget'=>15],
         'gpt-5-6-luna'=>['in'=>0.20,'out'=>1.20,'cache'=>0.02,'cachew'=>0.25,'budget'=>15],
         'glm-5-3-flash'=>['in'=>0.15,'out'=>0.50,'cache'=>0.03,'cachew'=>null,'budget'=>60],
         'glm-5-3'=>['in'=>1.40,'out'=>4.40,'cache'=>0.26,'cachew'=>null,'budget'=>15],
         'glm-5-2'=>['in'=>1.40,'out'=>4.40,'cache'=>0.26,'cachew'=>null,'budget'=>60],
-        'glm-5-1'=>['in'=>1.40,'out'=>4.40,'cache'=>0.26,'cachew'=>null,'budget'=>60],
-        'kimi-k3'=>['in'=>3.00,'out'=>15.00,'cache'=>0.30,'cachew'=>null,'budget'=>15],
+        'kimi-k3-1-pro'=>['in'=>2.00,'out'=>10.00,'cache'=>0.20,'cachew'=>2.00,'budget'=>15],
+        'kimi-k3'=>['in'=>3.00,'out'=>15.00,'cache'=>0.30,'cachew'=>3.00,'budget'=>15],
         'kimi-k2-7-code'=>['in'=>0.95,'out'=>4.00,'cache'=>0.19,'cachew'=>null,'budget'=>60],
-        'kimi-k2-6'=>['in'=>0.95,'out'=>4.00,'cache'=>0.16,'cachew'=>null,'budget'=>60],
         'longcat-2-0'=>['in'=>0.30,'out'=>1.20,'cache'=>0.006,'cachew'=>null,'budget'=>60],
+        'step-5-preview'=>['in'=>1.00,'out'=>2.70,'cache'=>0.10,'cachew'=>null,'budget'=>15],
         'mimo-v2-5'=>['in'=>0.14,'out'=>0.28,'cache'=>0.0028,'cachew'=>null,'budget'=>60],
         'mimo-v2-5-pro'=>['in'=>0.435,'out'=>0.87,'cache'=>0.003625,'cachew'=>null,'budget'=>15],
+        'mimo-v2-6-flash'=>['in'=>0.14,'out'=>0.28,'cache'=>0.0028,'cachew'=>null,'budget'=>60],
+        'mimo-v2-6-pro'=>['in'=>0.435,'out'=>0.87,'cache'=>0.003625,'cachew'=>null,'budget'=>15],
+        'minimax-m3-1-flash'=>['in'=>0.15,'out'=>0.60,'cache'=>0.015,'cachew'=>null,'budget'=>20],
         'minimax-m3'=>['in'=>0.30,'out'=>1.20,'cache'=>0.06,'cachew'=>null,'budget'=>60],
-        'minimax-m2-7'=>['in'=>0.30,'out'=>1.20,'cache'=>0.06,'cachew'=>0.375,'budget'=>60],
-        'minimax-m2-5'=>['in'=>0.30,'out'=>1.20,'cache'=>0.06,'cachew'=>0.375,'budget'=>60],
         'muse-spark-1-3-contributor'=>['in'=>0.10,'out'=>0.20,'cache'=>0.002,'cachew'=>null,'budget'=>60],
         'muse-spark-1-2-contributor'=>['in'=>0.10,'out'=>0.20,'cache'=>0.002,'cachew'=>null,'budget'=>60],
         'qwen3-8-max'=>['in'=>2.00,'out'=>6.00,'cache'=>0.25,'cachew'=>2.50,'budget'=>15],
         'qwen3-8-flash'=>['in'=>0.15,'out'=>0.47,'cache'=>0.016,'cachew'=>0.20,'budget'=>30],
-        'qwen3-7-max'=>['in'=>2.50,'out'=>7.50,'cache'=>0.50,'cachew'=>3.125,'budget'=>30],
         'qwen3-7-plus'=>['in'=>0.40,'out'=>1.60,'cache'=>0.04,'cachew'=>0.50,'budget'=>60],
-        'qwen3-6-plus'=>['in'=>0.50,'out'=>3.00,'cache'=>0.05,'cachew'=>0.625,'budget'=>60],
         'deepseek-v4-pro'=>['in'=>0.66,'out'=>1.98,'cache'=>0.022,'cachew'=>null,'budget'=>15],
-        'deepseek-v4-flash'=>['in'=>0.15,'out'=>0.60,'cache'=>0.003,'cachew'=>null,'budget'=>30],
-        'deepseek-flash'=>['in'=>0.15,'out'=>0.60,'cache'=>0.003,'cachew'=>null,'budget'=>15], // live短ID,即文档DeepSeek V4.1 Flash($15)
-        'deepseek-v4-1-flash'=>['in'=>0.15,'out'=>0.60,'cache'=>0.003,'cachew'=>null,'budget'=>15], // 文档Endpoints表ID deepseek-v4.1-flash,即V4.1 Flash Off-Peak($15)
-        'deepseek-v4-flash-vision-exp'=>['in'=>0.15,'out'=>0.60,'cache'=>0.003,'cachew'=>null,'budget'=>15],
+        'deepseek-v4-1-flash'=>['in'=>0.15,'out'=>0.60,'cache'=>0.003,'cachew'=>null,'budget'=>100], // Off-Peak,月限$100
+        'hy4'=>['in'=>0.834,'out'=>2.501,'cache'=>0.042,'cachew'=>null,'budget'=>60],
         'hy4-preview'=>['in'=>0.834,'out'=>2.501,'cache'=>0.042,'cachew'=>null,'budget'=>30],
         'hy3'=>['in'=>0.14,'out'=>0.58,'cache'=>0.035,'cachew'=>null,'budget'=>60],
-        // legacy:不在官方文档但live API仍返回,保留以免变待定价0
-        'omen-alpha'=>['in'=>0.20,'out'=>0.66,'cache'=>0.04,'cachew'=>null,'budget'=>100],
+        'claude-haiku-5-5'=>['in'=>0.10,'out'=>0.50,'cache'=>0.01,'cachew'=>0.125,'budget'=>15], // <=100K tier
+        'gemini-4-argon'=>['in'=>2.00,'out'=>10.00,'cache'=>0.10,'cachew'=>null,'budget'=>30], // 50% off后价
     ];
     // normalize keys to dash form
     $out=[];
     foreach($raw as $k=>$v){ $out[normalize_id($k)]=$v; }
     return $out;
 }
-// Official Estimated requests from https://opencode.ai/docs/go#estimated-requests
-// [req_5h, req_week, req_month].以此为准,不再用固定800/200/50k反推(各模型真实用量不同,反推偏差可达3倍).
+// Official Estimated requests from https://opencode.ai/docs/go#estimated-requests (Go plan)
+// Synced 2026-11-06. [req_5h, req_week, req_month].以此为准,不再用固定800/200/50k反推(各模型真实用量不同,反推偏差可达3倍).
 function opencode_estimated(): array {
     $raw = [
         'glm-5-3-flash'=>[6320,15790,31580],
         'glm-5-3'=>[220,540,1080],
         'glm-5-2'=>[880,2150,4300],
-        'glm-5-1'=>[880,2150,4300],
+        'kimi-k3-1-pro'=>[147,368,735],
         'kimi-k3'=>[110,250,490],
         'kimi-k2-7-code'=>[1350,3380,6750],
-        'kimi-k2-6'=>[1150,2880,5750],
         'longcat-2-0'=>[11400,28600,57200],
+        'step-5-preview'=>[430,1070,2130],
         'mimo-v2-5'=>[30100,75200,150400],
         'mimo-v2-5-pro'=>[3250,8150,16300],
+        'mimo-v2-6-flash'=>[30100,75200,150400],
+        'mimo-v2-6-pro'=>[3250,8150,16300],
+        'minimax-m3-1-flash'=>[3880,9690,19380],
         'minimax-m3'=>[3200,8000,16000],
-        'minimax-m2-7'=>[3400,8500,17000],
         'muse-spark-1-3-contributor'=>[45300,113300,226600],
         'muse-spark-1-2-contributor'=>[45300,113300,226600],
         'qwen3-8-max'=>[160,400,810],
         'qwen3-8-flash'=>[5400,13500,27000],
-        'qwen3-7-max'=>[170,420,840],
         'qwen3-7-plus'=>[4300,10800,21600],
-        'qwen3-6-plus'=>[3300,8200,16300],
-        'deepseek-v4-1-flash'=>[6500,16250,32500],
+        'deepseek-v4-1-flash'=>[43330,108330,216670],
         'deepseek-v4-pro'=>[1050,2600,5200],
-        'deepseek-v4-flash'=>[13000,32500,65000],
-        'deepseek-v4-flash-vision-exp'=>[6500,16250,32500],
+        'hy4'=>[2710,6770,13500],
         'hy4-preview'=>[1350,3380,6770],
         'hy3'=>[4300,10750,21500],
-        'grok-4-6'=>[169,423,845],
+        'grok-4-7'=>[169,423,845],
+        'gpt-6-luna'=>[4230,10560,21130],
         'gpt-5-6-luna'=>[2050,5100,10250],
-        // 别名:live API里的deepseek-flash(无版本号)按V4.1 Flash计
-        'deepseek-flash'=>[6500,16250,32500],
+        'claude-haiku-5-5'=>[3850,9620,19230],
+        'gemini-4-argon'=>[440,1080,2120],
     ];
     $out=[];
     foreach($raw as $k=>$v){ $out[normalize_id($k)]=$v; }
@@ -192,11 +191,26 @@ function parse_opencode(): array {
         if (!isset($pricing[$lid]) && !in_array($lid, $ids)) $ids[] = $lid;
     }
     $est = opencode_estimated();
+    // 官网限时免费不限量(Unlimited):Beam Free / Iceman Contributor Free
+    $freeNames = ['beam-free'=>'Beam Free','iceman-contributor-free'=>'Iceman Contributor Free'];
     $out=[];
     foreach(array_unique($ids) as $id){
         $norm = normalize_id($id);
         $pr = $pricing[$norm] ?? null;
         if (!$pr) {
+            if (isset($freeNames[$norm])) {
+                // 官网限时免费不限量:按FREE不限量收录
+                $out[]=[
+                    'source'=>'opencode',
+                    'model_id'=>$norm,
+                    'display_name'=>$freeNames[$norm],
+                    'context'=>'1M',
+                    'req_5h'=>199999,'req_week'=>499999,'req_month'=>999999,'budget'=>0,
+                    'input_price'=>0.0,'output_price'=>0.0,'cache_read_price'=>0.0,'cache_write_price'=>null,
+                    'intelligence'=>null,'tps'=>null,'is_free'=>1,
+                ];
+                continue;
+            }
             // new model not in pricing table yet: show as 待定价, is_new will mark
             $out[]=[
                 'source'=>'opencode',
@@ -256,18 +270,26 @@ function parse_commandcode(): array {
                 $tds = $tdm[1] ?? [];
                 if (count($tds) < 7) continue;
                 $strip = function($s){ return trim(preg_replace('/<[^>]+>/',' ', $s)); };
-                $context = $strip($tds[1]);
-                $intel_raw = $strip($tds[2]);
+                // 官网表格2026-10起为8列:模型/上下文/分数/Input/Output/Cache read/Cache write/Caps(无TPS列);兼容旧9列布局
+                if (count($tds) >= 9) {
+                    $context = $strip($tds[1]);
+                    $intel_raw = $strip($tds[2]);
+                    $tps_raw = $strip($tds[3]);
+                    $tps = is_numeric($tps_raw) ? (float)$tps_raw : null;
+                    $inp_raw = $tds[4]; $out_raw = $tds[5]; $cache_raw = $tds[6]; $cachew_raw = $tds[7];
+                } else {
+                    $context = $strip($tds[1]);
+                    $intel_raw = $strip($tds[2]);
+                    $tps = null;
+                    $inp_raw = $tds[3]; $out_raw = $tds[4]; $cache_raw = $tds[5]; $cachew_raw = $tds[6];
+                }
                 $intel = null;
                 if ($intel_raw !== '' && stripos($intel_raw,'not yet')===false) {
                     $intel = is_numeric($intel_raw) ? (float)$intel_raw : null;
                 }
-                $tps_raw = $strip($tds[3]);
-                $tps = is_numeric($tps_raw) ? (float)$tps_raw : null;
-                $inp_raw = $strip($tds[4]);
-                $out_raw = $strip($tds[5]);
-                $cache_raw = $strip($tds[6]);
                 $parsePrice = function($s){
+                    $s = preg_replace('/<s\b.*?<\/s>/s', '', $s); // 去掉划线老价(含属性),留deal现价
+                    $s = preg_replace('/<button\b.*?<\/button>/s', '', $s); // 去掉+1提示按钮(含aria峰时价),留表格展示价(非峰价)
                     if (stripos($s,'Free')!==false) return 0.0;
                     if (preg_match('/\$([0-9\.]+)/', $s, $pp)) return (float)$pp[1];
                     return null;
@@ -275,6 +297,7 @@ function parse_commandcode(): array {
                 $inp = $parsePrice($inp_raw);
                 $outp = $parsePrice($out_raw);
                 $cache = $parsePrice($cache_raw);
+                $cachew = $parsePrice($cachew_raw);
                 // if all null, skip?
                 $out_item = [
                     'source'=>'commandcode',
@@ -286,6 +309,7 @@ function parse_commandcode(): array {
                     'input_price'=>$inp,
                     'output_price'=>$outp,
                     'cache_read_price'=>$cache,
+                    'cache_write_price'=>$cachew,
                     'is_free'=>($inp===0.0 && $outp===0.0)?1:0,
                 ];
                 $budget = goat_budget($mid);
@@ -392,5 +416,15 @@ function do_refresh(string $actor='cron', string $type='auto'): array {
     if ($type==='auto') set_meta('last_auto_refresh', (string)$now);
     db()->exec("UPDATE models SET is_new=0 WHERE first_seen_at < ".($now-7*86400));
     db()->exec("UPDATE models SET is_new=1 WHERE first_seen_at >= ".($now-7*86400));
-    return ['inserted'=>$inserted,'updated'=>$updated,'total'=>count($all),'opencode'=>count($op),'commandcode'=>count($cc)];
+    // 清理:opencode源连续7天既不在文档定价表也不在live列表的模型(已下架/轮换结束),避免榜单堆积死数据
+    $canon = [];
+    foreach($all as $m){ if($m['source']==='opencode') $canon[] = normalize_id($m['model_id']); }
+    $canon = array_values(array_unique($canon));
+    if (!empty($canon)) {
+        $place = implode(',', array_fill(0, count($canon), '?'));
+        $del = db()->prepare("DELETE FROM models WHERE source='opencode' AND updated_at < ? AND model_id NOT IN ($place)");
+        $del->execute(array_merge([$now-7*86400], $canon));
+        $pruned = $del->rowCount();
+    } else { $pruned = 0; }
+    return ['inserted'=>$inserted,'updated'=>$updated,'total'=>count($all),'opencode'=>count($op),'commandcode'=>count($cc),'pruned'=>$pruned];
 }
