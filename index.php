@@ -69,13 +69,30 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
 </header>
 
 <main class="max-w-[1280px] mx-auto px-4 md:px-6 py-6 md:py-8">
+  <!-- Go 订阅用量（站长 Key 在服务端，前端只拿数字，公开） -->
+  <div class="card p-5 md:p-6 mb-6" id="goUsage" style="display:none">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div class="text-[13px] font-semibold">站长 Go 订阅用量 <span class="text-[11px] font-normal text-muted">实时 · 服务端缓存2分钟</span></div>
+      <div class="flex items-center gap-2">
+        <span id="goUpdated" class="text-[11px] text-muted"></span>
+        <button id="btnGoUsage" class="text-[12px] font-semibold text-blue-700 hover:underline">刷新</button>
+      </div>
+    </div>
+    <div id="goWindows" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3"></div>
+    <details class="mt-3">
+      <summary class="text-[12px] text-muted cursor-pointer">Go 可用模型（<span id="goModelCount">—</span>）</summary>
+      <div id="goModels" class="mt-2 flex flex-wrap gap-1.5"></div>
+    </details>
+  </div>
+
+
   <!-- Hero -->
   <div class="grid grid-cols-12 gap-4 md:gap-6 mb-6">
     <div class="col-span-12 lg:col-span-8 card p-5 md:p-6">
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 class="text-[22px] md:text-[26px] font-bold tracking-tight leading-tight">用<span class="text-blue-700">性价比分</span>挑模型，<br class="hidden md:block">不只看价格，也不只看榜单。</h1>
-          <p class="text-[13px] text-muted mt-2 leading-relaxed">默认排序 = <b class="text-ink">总回报 (Intelligence−30) × 月额度</b>（<b>月额度</b>=官方 Estimated requests，订阅费固定，额度给得越多越值）。分高量大排前面，<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-600"></span>NEW</span> 为7天内新上架。</p>
+          <h1 class="text-[22px] md:text-[26px] font-bold tracking-tight leading-tight">用<span class="text-blue-700">月额度</span>挑模型，<br class="hidden md:block">不只看价格，也不只看榜单。</h1>
+          <p class="text-[13px] text-muted mt-2 leading-relaxed">默认排序 = <b class="text-ink">月额度</b>（官方 Estimated requests，订阅费固定，额度给得越多越值）。额度大量大排前面，<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-600"></span>NEW</span> 为7天内新上架。</p>
         </div>
         <div class="flex gap-2 text-[11px]">
           <span class="tag bg-slate-900 text-white">7x GOAT $10→$70</span>
@@ -157,7 +174,7 @@ $lastStr = $last!=='0' ? date('Y-m-d H:i', (int)$last) : '未刷新';
 const $ = s=>document.querySelector(s);
 const tbody = $('#tbody');
 let data = [];
-let filters = {q:'', source:'opencode', only_new:false, sorts:[{col:'value',dir:'desc'}]};
+let filters = {q:'', source:'opencode', only_new:false, sorts:[{col:'req_month',dir:'desc'}]};
 
 function fmt(n){ if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(n>=10000?0:1)+'k'; return String(n); }
 function price(v){ if(v===null||v===undefined) return '<span class="text-muted">—</span>'; if(v===0) return '<span class="tag bg-emerald-500 text-white">FREE</span>'; let s=Number(v); if(s<0.01) return '$'+s.toFixed(3); if(s<0.1) return '$'+s.toFixed(3); return '$'+s.toFixed(2); }
@@ -294,6 +311,61 @@ $('#btnRefresh').addEventListener('click', async ()=>{
   }catch(e){ alert(e.message); }
   finally{ btn.disabled=false; btn.innerHTML='<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 刷新'; }
 });
+
+// ---- Go 订阅用量（公开，站长 Key 在服务端） ----
+function goFmtLeft(ms){
+  if(ms<=0) return '已重置';
+  const s=Math.floor(ms/1000), d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), ss=s%60;
+  const p=n=>String(n).padStart(2,'0');
+  return (d?d+'天':'')+h+'时'+p(m)+'分'+p(ss)+'秒';
+}
+function goTick(){ document.querySelectorAll('#goWindows [data-ts]').forEach(el=>{ const ts=+el.dataset.ts; if(ts) el.textContent=goFmtLeft(ts-Date.now()); }); }
+setInterval(goTick,1000);
+function goWin(name,w,f,perHour){
+  const p=(w&&typeof w.percent==='number')?w.percent:null;
+  const st=(w&&w.status)||'-', rs=(w&&w.resetsAt)||'';
+  const ts=rs&&!isNaN(Date.parse(rs))?Date.parse(rs):0;
+  const hot=p!==null&&p>=90;
+  let extra='';
+  if(f&&typeof f.daily_budget==='number'){
+    const budget=perHour?('每小时可用约 '+f.hourly_budget+'%'):('每天可用约 '+f.daily_budget+'%');
+    extra=`<div class="text-[11px] mt-1 font-semibold text-emerald-700">剩余 ${f.remaining_pct}% · 还剩 ${f.days_left} 天 · ${budget}</div>`;
+    if(f.today&&typeof f.today.used_today==='number'){
+      const over=f.today.left_today<0;
+      extra+=`<div class="text-[11px] ${over?'text-red-600 font-semibold':'text-muted'}">今日已用 ${f.today.used_today}% · 今日还剩 ${f.today.left_today}%${f.today.collecting?' · 记录中':''}（自${f.today.since}起记）</div>`;
+    }
+    if(typeof f.daily_burn==='number'){
+      const vc=f.verdict==='会超'?'text-red-600':(f.verdict==='偏快'?'text-amber-600':'text-muted');
+      extra+=`<div class="text-[11px] ${vc}">实际日均 ${f.daily_burn}% · 预计重置时 ${f.projected_at_reset}% · ${f.verdict}</div>`;
+    }
+  }
+  return `<div>
+    <div class="text-[12px] text-muted">${name}</div>
+    <div class="font-mono text-[24px] font-bold leading-snug">${p===null?'?':p}<span class="text-[12px] font-normal text-muted">% 已用</span></div>
+    <div class="score-bar mt-1.5"><div class="score-fill ${hot?'bg-red-600':'bg-blue-600'}" style="width:${p===null?0:Math.min(100,Math.max(0,p))}%"></div></div>
+    <div class="text-[11px] text-muted mt-1">状态 ${st} · 重置 <span data-ts="${ts}">${rs?goFmtLeft(ts-Date.now()):'-'}</span></div>${extra}
+  </div>`;
+}
+async function loadGoUsage(){
+  const box=$('#goUsage'); if(!box) return;
+  try{
+    const r=await fetch('api.php?action=usage');
+    const j=await r.json();
+    if(!j.ok) return;
+    const d=j.data;
+    const fc=d.forecast||{};
+    $('#goWindows').innerHTML=goWin('环限 · 5小时',d.rolling,fc.rolling,true)+goWin('周限',d.weekly,fc.weekly,false)+goWin('月限',d.monthly,fc.monthly,false);
+    const ids=Array.isArray(d.models)?d.models:[];
+    $('#goModelCount').textContent=ids.length||d.models_count||0;
+    $('#goModels').innerHTML=ids.map(id=>`<span class="font-mono text-[11px] px-2 py-0.5 rounded-full border border-line bg-[#fafafa]">${String(id).replace(/[<>&"]/g,'')}</span>`).join('')||'<span class="text-[12px] text-muted">暂无</span>';
+    const t=new Date(d.fetched_at*1000);
+    const p=n=>String(n).padStart(2,'0');
+    $('#goUpdated').textContent='更新于 '+p(t.getHours())+':'+p(t.getMinutes())+(d.cached?' · 缓存':'');
+    box.style.display='';
+  }catch(e){/* 上游失败整块隐藏，保持榜单干净 */}
+}
+$('#btnGoUsage').addEventListener('click',loadGoUsage);
+loadGoUsage();
 
 // initial load, if empty trigger refresh
 load().then(()=>{
