@@ -392,6 +392,28 @@ function do_refresh(string $actor='cron', string $type='auto'): array {
     $wasEmpty = ((int)db()->query("SELECT COUNT(*) FROM models")->fetchColumn() === 0);
     $baselineTime = $wasEmpty ? $now - 10*86400 : $now;
     $all = array_merge($op,$cc);
+    // 覆盖分：以 commandcode 详情页抓到的 Intelligence index 为准（scores.php 产出，cron 02:50 刷新）
+    if (is_file(__DIR__ . '/data/scores.json')) {
+        $sd = json_decode((string)file_get_contents(__DIR__ . '/data/scores.json'), true);
+        $scores = $sd['scores'] ?? [];
+        $lookup = function(string $id) use ($scores): ?float {
+            $n = normalize_id($id);
+            $cands = [$n, $n . '-free', (string)preg_replace('/-free$/','',$n)];
+            // 变体回退：contributor / preview / exp 没单独评分时继承主版本
+            foreach (['-contributor','-preview','-exp'] as $suf) {
+                if (substr($n, -strlen($suf)) === $suf) $cands[] = substr($n, 0, -strlen($suf));
+            }
+            foreach ($cands as $k) {
+                if (isset($scores[$k]) && $scores[$k]['intel'] !== null) return (float)$scores[$k]['intel'];
+            }
+            return null;
+        };
+        foreach ($all as &$mm) {
+            // 一律以 scores.json 为准：列表页 <tr> 解析出的"分数"其实是价格等错位字段（0.1/0.16 之类）
+            $mm['intelligence'] = $lookup((string)$mm['model_id']);
+        }
+        unset($mm);
+    }
     $inserted=0; $updated=0;
     foreach($all as $m){
         $mid = normalize_id($m['model_id']);
