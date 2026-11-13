@@ -227,8 +227,9 @@ if ($action === 'usage') {
 
 if ($action === 'recommend') {
     db();
-    $min_intel = isset($_GET['min_intel']) && $_GET['min_intel']!=='' ? (float)$_GET['min_intel'] : 35;
-    $min_req = isset($_GET['min_req']) && $_GET['min_req']!=='' ? (int)$_GET['min_req'] : 10000;
+    $sort = (string)($_GET['sort'] ?? 'req');   // req=按月额度 | combo=分×额度（两条约束都不硬卡）
+    $min_intel = isset($_GET['min_intel']) && $_GET['min_intel']!=='' ? (float)$_GET['min_intel'] : ($sort==='combo' ? 0 : 35);
+    $min_req = isset($_GET['min_req']) && $_GET['min_req']!=='' ? (int)$_GET['min_req'] : ($sort==='combo' ? 1 : 10000);
     $limit = isset($_GET['limit']) && $_GET['limit']!=='' ? max(1, min(50, (int)$_GET['limit'])) : 8;
     // 同族补分：无分模型继承同族已评分版本的分数（is_patch=1）
     $patch = [
@@ -248,14 +249,17 @@ if ($action === 'recommend') {
         if ((int)$r['req_month'] < $min_req) continue;
         $r['eff_intel'] = (float)$eff;
         $r['is_patch'] = $is_patch ? 1 : 0;
+        // 综合分 = 分 × 月额度(千)，两个维度都算进去，避免"高分没额度"和"额度大没分"各自霸榜
+        $r['combo'] = round($r['eff_intel'] * ((int)$r['req_month'] / 1000), 1);
         $out[] = $r;
     }
-    usort($out, function($a, $b) {
+    usort($out, function($a, $b) use ($sort) {
+        if ($sort === 'combo' && (float)$a['combo'] !== (float)$b['combo']) return (float)$b['combo'] <=> (float)$a['combo'];
         if ((int)$b['req_month'] !== (int)$a['req_month']) return (int)$b['req_month'] <=> (int)$a['req_month'];
         return (float)$b['eff_intel'] <=> (float)$a['eff_intel'];
     });
     $out = array_slice($out, 0, $limit);
-    ok(['rows'=>$out, 'min_intel'=>$min_intel, 'min_req'=>$min_req, 'limit'=>$limit, 'fetched_at'=>time()]);
+    ok(['rows'=>$out, 'sort'=>$sort, 'min_intel'=>$min_intel, 'min_req'=>$min_req, 'limit'=>$limit, 'fetched_at'=>time()]);
 }
 
 if ($action !== '') fail('Unknown action', 404);
