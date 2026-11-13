@@ -237,7 +237,7 @@ if ($action === 'recommend') {
         'deepseek-v4-1-flash'=>34.0, 'deepseek-flash'=>34.0,                   // 继承 deepseek-v4-flash
         'mimo-v2-5'=>25.2, 'hy3'=>25.3,
     ];
-    $rows = db()->query("SELECT model_id,display_name,intelligence,input_price,output_price,cache_read_price,req_5h,req_week,req_month,budget,source FROM models WHERE source='opencode'")->fetchAll(PDO::FETCH_ASSOC);
+    $rows = db()->query("SELECT model_id,display_name,context,intelligence,input_price,output_price,cache_read_price,req_5h,req_week,req_month,budget,source FROM models WHERE source='opencode'")->fetchAll(PDO::FETCH_ASSOC);
     $out = [];
     foreach ($rows as $r) {
         $mid = strtolower(str_replace(['.', '_'], '-', (string)$r['model_id']));
